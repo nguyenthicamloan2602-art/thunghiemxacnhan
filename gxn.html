@@ -303,7 +303,10 @@
                   </div>
 
                   <div id="slideContainerWrapper" class="slide-preview-container relative flex-1">
-                    <iframe id="gxnPreviewIframe" src="" class="w-full h-full border-0 pointer-events-auto"></iframe>
+                    <div id="iframeLoadingBadge" class="hidden absolute inset-0 bg-white/80 backdrop-blur-[1px] z-20 flex items-center justify-center text-xs font-bold text-indigo-700">
+                      ⏳ Đang nạp trang hiển thị...
+                    </div>
+                    <iframe id="gxnPreviewIframe" src="" onload="document.getElementById('iframeLoadingBadge').classList.add('hidden')" class="w-full h-full border-0 pointer-events-auto"></iframe>
                     <div id="stampsOverlayLayer" class="absolute inset-0 pointer-events-none"></div>
                   </div>
 
@@ -313,7 +316,7 @@
                       Đã chèn: 0 dấu/chữ ký
                     </span>
                     <span id="stampDragHint" class="text-slate-400 italic">
-                      💡 Bấm "Đến trang cuối ký tên", chèn dấu và kéo thả vào khung ký tên
+                      💡 Nhấp đúp vào khung ký tên để đóng dấu nhanh (tự động đóng dấu giáp lai nếu ≥ 2 trang)
                     </span>
                   </div>
                 </div>
@@ -408,7 +411,7 @@
     var selectedStampIndex = null;
 
     // ==============================================================
-    // QUẢN LÝ KHO CHỮ KÝ ĐỒNG BỘ TỪ GOOGLE DRIVE
+    // QUẢN LÝ KHO CHỮ KÝ & DẤU MỘC ĐỒNG BỘ TỪ GOOGLE DRIVE
     // ==============================================================
     function loadDriveSignatures() {
       const container = document.getElementById('savedSignaturesContainer');
@@ -590,7 +593,6 @@
       renderStamps();
     }
 
-    // 1. KÉO THẢ SIÊU MƯỢT (VÔ HIỆU HÓA IFRAME TẠM THỜI KHI ĐANG KÉO)
     function startStampDrag(e, idx) {
       if (e.target.classList.contains('stamp-handle') || e.target.closest('button')) return;
       e.preventDefault();
@@ -641,7 +643,6 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // 2. THU PHÓNG SIÊU MƯỢT
     function startStampResize(e, idx, corner) {
       e.preventDefault();
       e.stopPropagation();
@@ -686,13 +687,12 @@
     }
 
     // ==============================================================
-    // KHỞI TẠO VÀ XỬ LÝ QUYỀN TRUY CẬP (CHẶN TUYỆT ĐỐI NHẦM VAI TRÒ)
+    // KHỞI TẠO VÀ XỬ LÝ QUYỀN TRUY CẬP
     // ==============================================================
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const isAdminParam = (urlParams.get('isAdmin') || "").toLowerCase() === "true";
 
-      // 1. Lấy thông tin Sinh viên từ URL, sessionStorage HOẶC localStorage
       const token = urlParams.get('token');
       let mssv = "";
       if (token) {
@@ -709,14 +709,12 @@
         mssv = parsedStudent.mssv.toString().trim();
       }
 
-      // 2. Lấy thông tin Admin (CHỈ nhận diện khi có isAdmin=true trên URL hoặc có object admin hợp lệ)
       const savedAdminRaw = sessionStorage.getItem('loggedAdmin') || localStorage.getItem('loggedAdmin');
       let parsedAdmin = null;
       if (savedAdminRaw) {
         try { parsedAdmin = JSON.parse(savedAdminRaw); } catch(e) {}
       }
 
-      // ƯU TIÊN 1: NẾU KHÔNG PHẢI CỜ ADMIN VÀ CÓ MSSV SINH VIÊN -> ÉP VÀO GIAO DIỆN SINH VIÊN
       if (!isAdminParam && mssv !== "") {
         sessionStorage.removeItem('loggedAdmin');
         localStorage.removeItem('loggedAdmin');
@@ -751,7 +749,6 @@
         return;
       }
 
-      // ƯU TIÊN 2: KIỂM TRA QUYỀN QTV / CTV HỢP LỆ
       let adminRole = isAdminParam ? urlParams.get('role') : (parsedAdmin && parsedAdmin.role);
       let adminName = isAdminParam ? urlParams.get('name') : (parsedAdmin && parsedAdmin.name);
 
@@ -1038,7 +1035,7 @@
 
     function selectRequest(item) {
       selectedRequest = item;
-      currentSlidePageIds = [];
+      currentSlidePageIds = Array.isArray(item.pageIds) ? item.pageIds : [];
       document.getElementById('workspaceEmpty').style.display = 'none';
       document.getElementById('workspaceDetail').style.display = 'flex';
 
@@ -1063,25 +1060,30 @@
       if (overlay) overlay.style.pointerEvents = isQtv ? 'auto' : 'none';
       if (btnOpen) btnOpen.style.display = isQtv ? 'inline-flex' : 'none';
 
-      currentSlidePageNum = 1;
+      // QTV: Nhảy thẳng sang trang cuối ký tên; CTV: Bắt đầu từ trang 1 để kiểm tra
+      const initTotal = getTotalSlidePages();
+      currentSlidePageNum = isQtv ? initTotal : 1;
+
       const iframe = document.getElementById('gxnPreviewIframe');
       if (item.slideId) {
         updateSlideIframePage();
         if (btnOpen) btnOpen.href = `https://docs.google.com/presentation/d/${item.slideId}/edit`;
 
-        // Lấy danh sách Object ID thật từng trang để nhảy trang chính xác 100%
-        fetch(GXN_API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "getSlidePages", slideId: item.slideId })
-        })
-        .then(r => r.json())
-        .then(res => {
-          if (res.success && Array.isArray(res.pageIds) && res.pageIds.length > 0) {
-            currentSlidePageIds = res.pageIds;
-            selectedRequest.totalPages = res.pageIds.length;
-            updateSlideIframePage();
-          }
-        }).catch(() => {});
+        if (currentSlidePageIds.length === 0) {
+          fetch(GXN_API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getSlidePages", slideId: item.slideId })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res.success && Array.isArray(res.pageIds) && res.pageIds.length > 0) {
+              currentSlidePageIds = res.pageIds;
+              selectedRequest.totalPages = res.pageIds.length;
+              if (isQtv) currentSlidePageNum = res.pageIds.length;
+              updateSlideIframePage();
+            }
+          }).catch(() => {});
+        }
       } else {
         iframe.src = "about:blank";
         if (btnOpen) btnOpen.href = "#";
@@ -1140,6 +1142,7 @@
     function updateSlideIframePage() {
       const iframe = document.getElementById('gxnPreviewIframe');
       const indicator = document.getElementById('slidePageIndicator');
+      const loadBadge = document.getElementById('iframeLoadingBadge');
       if (!selectedRequest || !selectedRequest.slideId || !iframe) return;
 
       const totalPages = getTotalSlidePages();
@@ -1148,11 +1151,12 @@
       const targetPageId = currentSlidePageIds[currentSlidePageNum - 1];
       const slideHash = targetPageId ? `#slide=id.${targetPageId}` : `#slide=id.p${currentSlidePageNum}`;
 
+      if (loadBadge) loadBadge.classList.remove('hidden');
+
       const isQtv = (currentAdmin && currentAdmin.role && currentAdmin.role.toString().trim().toUpperCase() === "QTV");
       if (isQtv) {
         iframe.src = `https://docs.google.com/presentation/d/${selectedRequest.slideId}/preview?rm=minimal${slideHash}`;
       } else {
-        // Hiện đầy đủ thanh công cụ cỡ chữ, căn lề, kéo bảng ngay trong khung cho CTV
         iframe.src = `https://docs.google.com/presentation/d/${selectedRequest.slideId}/edit?usp=sharing${slideHash}`;
       }
 
@@ -1210,11 +1214,10 @@
     }
 
     // ==============================================================
-    // PHÊ DUYỆT & GỬI DỮ LIỆU CHỮ KÝ LÊN TRANG CUỐI CÙNG (XUẤT PDF HÒA LỚP)
+    // PHÊ DUYỆT, ĐÓNG DẤU GIÁP LAI & KHÓA CHỮ KÝ SỐ VECTOR
     // ==============================================================
     async function generateQrPngBytes(text) {
       const safeText = (text || "UMP-GXN-VERIFIED").toString().trim().substring(0, 220);
-      // Mã hóa chuẩn UTF-8 để Google Lens, Zalo và camera điện thoại đọc tiếng Việt có dấu chuẩn 100%
       const utf8Text = unescape(encodeURIComponent(safeText));
       const qr = new QRious({
         value: utf8Text,
@@ -1226,6 +1229,42 @@
       const dataUrl = qr.toDataURL('image/png');
       const res = await fetch(dataUrl);
       return new Uint8Array(await res.arrayBuffer());
+    }
+
+    function buildGiapLaiSlices(sealDataUrl, totalPages) {
+      return new Promise((resolve) => {
+        if (!sealDataUrl || totalPages < 2) return resolve([]);
+        const img = new Image();
+        img.onload = function() {
+          const slices = [];
+          const sliceW = img.width / totalPages;
+          const sliceH = img.height;
+
+          for (let i = 0; i < totalPages; i++) {
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(sliceW);
+            canvas.height = Math.round(sliceH);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(
+              img,
+              i * sliceW, 0, sliceW, sliceH,
+              0, 0, canvas.width, canvas.height
+            );
+            canvas.toBlob(async (blob) => {
+              const buf = await blob.arrayBuffer();
+              slices[i] = {
+                bytes: new Uint8Array(buf),
+                aspectRatio: canvas.height / canvas.width
+              };
+              if (slices.filter(Boolean).length === totalPages) {
+                resolve(slices);
+              }
+            }, 'image/png');
+          }
+        };
+        img.onerror = () => resolve([]);
+        img.src = sealDataUrl;
+      });
     }
 
     async function embedLockedWidgetAnnotation(pdfDoc, page, pageIndex, fieldName, pngBytes, x, y, width, height) {
@@ -1334,6 +1373,35 @@
           }
         }
 
+        // ĐÓNG DẤU GIÁP LAI TỰ ĐỘNG NẾU VĂN BẢN CÓ TỪ 2 TRANG TRỞ LÊN
+        if (pages.length >= 2) {
+          const giapLaiItem = driveSignaturesCache.find(s => {
+            const n = normalizeStr(s.name);
+            return n.includes("giap lai") || n.includes("giap_lai") || n.includes("dau moc") || n.includes("moc tron");
+          });
+
+          if (giapLaiItem && giapLaiItem.dataUrl) {
+            const slices = await buildGiapLaiSlices(giapLaiItem.dataUrl, pages.length);
+            const fullSealDiameter = 98;
+            const slicePdfW = fullSealDiameter / pages.length;
+            const slicePdfH = fullSealDiameter;
+
+            for (let pIdx = 0; pIdx < pages.length; pIdx++) {
+              if (!slices[pIdx]) continue;
+              const page = pages[pIdx];
+              const { width: pW, height: pH } = page.getSize();
+              const gx = pW - slicePdfW;
+              const gy = (pH - slicePdfH) / 2;
+
+              await embedLockedWidgetAnnotation(
+                pdfDoc, page, pIdx,
+                `UMP_GIAP_LAI_P${pIdx + 1}_${Date.now()}`,
+                slices[pIdx].bytes, gx, gy, slicePdfW, slicePdfH
+              );
+            }
+          }
+        }
+
         const lastPageIdx = pages.length - 1;
         const lastPage = pages[lastPageIdx];
         const { width: lpW, height: lpH } = lastPage.getSize();
@@ -1348,12 +1416,10 @@
           const stampRes = await fetch(img.src);
           const stampPngBytes = new Uint8Array(await stampRes.arrayBuffer());
 
-          // Lấy kích thước thật của ảnh PNG để giữ nguyên tỷ lệ chuẩn, tuyệt đối không bị méo tròn
           const tempImg = await pdfDoc.embedPng(stampPngBytes);
           const naturalRatio = tempImg.height / tempImg.width;
 
-          // Tỷ lệ trang giấy A4 thực tế hiển thị bên trong khung preview Google Slides (trừ viền đen 2 bên & trên/dưới)
-          const pageRatio = lpW / lpH; // ~0.707
+          const pageRatio = lpW / lpH;
           let innerW = canvasW;
           let innerH = canvasH;
           if (canvasW / canvasH > pageRatio) {
@@ -1367,7 +1433,6 @@
           const padLeft = (canvasW - innerW) / 2;
           const padTop = (canvasH - innerH) / 2;
 
-          // Quy đổi tọa độ từ khung preview sang trang giấy thật
           const relX = (stamp.x - padLeft) / innerW;
           const relY = (stamp.y - padTop) / innerH;
           const relW = stamp.width / innerW;
@@ -1489,7 +1554,7 @@
     }
 
     // ==============================================================
-    // CHỨC NĂNG PHÍA SINH VIÊN (CHỌN TOÀN BỘ HOẠT ĐỘNG & TẢI PDF)
+    // CHỨC NĂNG PHÍA SINH VIÊN
     // ==============================================================
     function showToast(msg, type = "info") {
       const toast = document.getElementById('statusToast');
@@ -1665,7 +1730,6 @@
       window.location.href = "/";
     }
 
-    // TỰ ĐỘNG CẬP NHẬT SLIDE KHI TỪ TAB GOOGLE SLIDES QUAY TRỞ LẠI
     window.addEventListener('focus', () => {
       const isQtv = (currentAdmin && currentAdmin.role && currentAdmin.role.toString().trim().toUpperCase() === "QTV");
       if (selectedRequest && selectedRequest.slideId && isQtv) {
@@ -1686,7 +1750,6 @@
         return;
       }
 
-      // Ưu tiên tìm chữ ký trùng tên với QTV đang đăng nhập, nếu không có thì lấy mẫu đầu tiên
       const adminNameNorm = normalizeStr(currentAdmin.name);
       const matchedSig = driveSignaturesCache.find(s => normalizeStr(s.name).includes(adminNameNorm)) || driveSignaturesCache[0];
       if (!matchedSig) return;
@@ -1704,7 +1767,6 @@
         const maxW = canvasEl.offsetWidth || 480;
         const maxH = canvasEl.offsetHeight || 678;
 
-        // Đặt tâm con dấu ngay tại vị trí nhấp đúp chuột
         const posX = Math.max(-w * 0.3, Math.min(maxW - w * 0.7, Math.round(clickX - w / 2)));
         const posY = Math.max(-h * 0.3, Math.min(maxH - h * 0.7, Math.round(clickY - h / 2)));
 
@@ -1737,7 +1799,7 @@
           if (e.target.closest('.stamp-box')) return;
 
           const now = Date.now();
-          if (now - lastQuickStampTime < 400) return; // Chặn gọi trùng 2 lần
+          if (now - lastQuickStampTime < 400) return;
           lastQuickStampTime = now;
 
           insertQuickSignatureAt(e.clientX, e.clientY);
@@ -1752,13 +1814,11 @@
       }
     });
 
-    // 2. Nhấn phím Enter để phê duyệt nhanh (QTV)
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       if (!currentAdmin || currentAdmin.role.toString().trim().toUpperCase() !== "QTV") return;
       if (!selectedRequest) return;
 
-      // Bỏ qua nếu đang gõ chữ trong ô tìm kiếm hoặc hộp thoại input/textarea
       const activeTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : "";
       if (activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT") return;
 
