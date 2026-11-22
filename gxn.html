@@ -1234,14 +1234,25 @@
       return new Uint8Array(await res.arrayBuffer());
     }
 
+    // Tạo N mảnh dấu giáp lai tự nhiên (có độ nghiêng nhẹ & độ lệch xòe giấy thực tế)
     function buildGiapLaiSlices(sealDataUrl, totalPages) {
       return new Promise((resolve) => {
         if (!sealDataUrl || totalPages < 2) return resolve([]);
         const img = new Image();
         img.onload = function() {
+          // Bước 1: Xoay nhẹ toàn bộ con dấu (-10 độ) trước khi cắt để tạo góc đóng tự nhiên
+          const rotCanvas = document.createElement('canvas');
+          rotCanvas.width = img.width;
+          rotCanvas.height = img.height;
+          const rCtx = rotCanvas.getContext('2d');
+          rCtx.translate(rotCanvas.width / 2, rotCanvas.height / 2);
+          rCtx.rotate((-10 * Math.PI) / 180);
+          rCtx.globalAlpha = 0.92; // Mực đỏ tự nhiên hòa nền giấy
+          rCtx.drawImage(img, -img.width / 2, -img.height / 2);
+
           const slices = [];
-          const sliceW = img.width / totalPages;
-          const sliceH = img.height;
+          const sliceW = rotCanvas.width / totalPages;
+          const sliceH = rotCanvas.height;
 
           for (let i = 0; i < totalPages; i++) {
             const canvas = document.createElement('canvas');
@@ -1249,7 +1260,7 @@
             canvas.height = Math.round(sliceH);
             const ctx = canvas.getContext('2d');
             ctx.drawImage(
-              img,
+              rotCanvas,
               i * sliceW, 0, sliceW, sliceH,
               0, 0, canvas.width, canvas.height
             );
@@ -1378,6 +1389,16 @@
 
         // ĐÓNG DẤU GIÁP LAI TỰ ĐỘNG NẾU VĂN BẢN CÓ TỪ 2 TRANG TRỞ LÊN
         if (pages.length >= 2) {
+          if (driveSignaturesCache.length === 0) {
+            const sigRes = await fetch(GXN_API_URL, {
+              method: "POST",
+              body: JSON.stringify({ action: "getSignatures" })
+            }).then(r => r.json());
+            if (sigRes.success && Array.isArray(sigRes.signatures)) {
+              driveSignaturesCache = sigRes.signatures;
+            }
+          }
+
           const giapLaiItem = driveSignaturesCache.find(s => {
             const n = normalizeStr(s.name);
             return n.includes("giap lai") || n.includes("giap_lai") || n.includes("dau moc") || n.includes("moc tron");
@@ -1385,7 +1406,7 @@
 
           if (giapLaiItem && giapLaiItem.dataUrl) {
             const slices = await buildGiapLaiSlices(giapLaiItem.dataUrl, pages.length);
-            const fullSealDiameter = 98;
+            const fullSealDiameter = 96; // Đường kính ~34mm chuẩn dấu Đoàn - Hội
             const slicePdfW = fullSealDiameter / pages.length;
             const slicePdfH = fullSealDiameter;
 
@@ -1393,8 +1414,10 @@
               if (!slices[pIdx]) continue;
               const page = pages[pIdx];
               const { width: pW, height: pH } = page.getSize();
-              const gx = pW - slicePdfW;
-              const gy = (pH - slicePdfH) / 2;
+              // Tạo độ xòe giấy tự nhiên ~1.5pt mỗi trang và đặt ở 1/3 trên mép phải
+              const fanOffsetY = (pIdx - (pages.length - 1) / 2) * 1.8;
+              const gx = pW - slicePdfW - 1;
+              const gy = (pH * 0.60) - (slicePdfH / 2) + fanOffsetY;
 
               await embedLockedWidgetAnnotation(
                 pdfDoc, page, pIdx,
