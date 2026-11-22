@@ -35,6 +35,21 @@
       height: 100%;
       border: none;
     }
+
+    /* Chế độ mở rộng tối đa diện tích soạn thảo cho CTV: ẩn thanh tiêu đề trên, cột trang trái, thanh phải và ghi chú đáy */
+    .slide-preview-container.ctv-editor-mode {
+      width: 100% !important;
+      height: 700px !important;
+      overflow: hidden;
+    }
+    .slide-preview-container.ctv-editor-mode iframe {
+      position: absolute;
+      top: -54px;     /* Ẩn thanh tiêu đề "Bản trình chiếu / Chia sẻ" phía trên */
+      left: -165px;   /* Ẩn cột danh sách trang thu nhỏ bên trái */
+      width: calc(100% + 235px);  /* Kéo tràn sang phải để ẩn thanh "Nội dung / Tải lên / Ghi" */
+      height: calc(100% + 125px); /* Kéo tràn xuống dưới để ẩn ô "Nhấp để thêm ghi chú" */
+    }
+    
     .stamp-box {
       position: absolute;
       touch-action: none;
@@ -1036,7 +1051,15 @@
       const overlay = document.getElementById('stampsOverlayLayer');
       const btnOpen = document.getElementById('btnOpenSlide');
 
-      if (wrapper) wrapper.style.width = isQtv ? '480px' : '100%';
+      if (wrapper) {
+        if (isQtv) {
+          wrapper.classList.remove('ctv-editor-mode');
+          wrapper.style.width = '480px';
+          wrapper.style.height = '678px';
+        } else {
+          wrapper.classList.add('ctv-editor-mode');
+        }
+      }
       if (overlay) overlay.style.pointerEvents = isQtv ? 'auto' : 'none';
       if (btnOpen) btnOpen.style.display = isQtv ? 'inline-flex' : 'none';
 
@@ -1204,7 +1227,7 @@
       const res = await fetch(dataUrl);
       return new Uint8Array(await res.arrayBuffer());
     }
-    
+
     async function embedLockedWidgetAnnotation(pdfDoc, page, pageIndex, fieldName, pngBytes, x, y, width, height) {
       const { PDFName, PDFNumber, PDFString } = PDFLib;
       const context = pdfDoc.context;
