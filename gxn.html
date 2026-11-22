@@ -126,7 +126,7 @@
 
             <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 text-xs text-sky-800 font-medium flex items-center gap-2">
               <span>ℹ️</span>
-              <span>Hệ thống hỗ trợ xuất <b>toàn bộ hoạt động trong học kỳ</b> thành 1 bản Giấy xác nhận PDF nhiều trang duy nhất.</span>
+              <span>CẬP NHẬT: Hệ thống đã hỗ trợ xuất <b>toàn bộ hoạt động trong học kỳ</b>.</span>
             </div>
 
             <div id="actListContainer" class="space-y-2 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
@@ -316,7 +316,7 @@
                       Đã chèn: 0 dấu/chữ ký
                     </span>
                     <span id="stampDragHint" class="text-slate-400 italic">
-                      💡 Nhấp đúp vào khung ký tên để đóng dấu nhanh (tự động đóng dấu giáp lai nếu ≥ 2 trang)
+                      💡 Nhấp đúp vào khung ký tên để đóng dấu nhanh.
                     </span>
                   </div>
                 </div>
@@ -1234,6 +1234,27 @@
       return new Uint8Array(await res.arrayBuffer());
     }
 
+    // Tạo nhãn số trang "Trang X/Y" sắc nét để khóa cứng vào góc dưới bên phải PDF lúc xuất gửi sinh viên
+    async function generatePageNumberPngBytes(currentPage, totalPages) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 260;
+      canvas.height = 56;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.font = '700 28px "Plus Jakarta Sans", Arial, sans-serif';
+      ctx.fillStyle = '#1e3a8a';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`Trang ${currentPage}/${totalPages}`, canvas.width - 6, canvas.height / 2);
+
+      return new Promise((resolve) => {
+        canvas.toBlob(async (blob) => {
+          resolve(new Uint8Array(await blob.arrayBuffer()));
+        }, 'image/png');
+      });
+    }
+
     // Tạo N mảnh dấu giáp lai tự nhiên (có độ nghiêng nhẹ & độ lệch xòe giấy thực tế)
     function buildGiapLaiSlices(sealDataUrl, totalPages) {
       return new Promise((resolve) => {
@@ -1374,6 +1395,7 @@
 
         for (let pIdx = 0; pIdx < pages.length; pIdx++) {
           const page = pages[pIdx];
+          const { width: pW } = page.getSize();
           const qrText = prepRes.qrPayloads[pIdx] || "";
           const qrPngBytes = await generateQrPngBytes(qrText);
 
@@ -1385,9 +1407,21 @@
               qrPngBytes, 35, 18, qrSize, qrSize
             );
           }
+
+          // Chỉ hiển thị số trang ở góc phải cuối cùng khi file xuất gửi sinh viên có từ 2 trang trở lên
+          if (pages.length > 1) {
+            const pageNumPngBytes = await generatePageNumberPngBytes(pIdx + 1, pages.length);
+            const numW = 86;
+            const numH = 18.5;
+            await embedLockedWidgetAnnotation(
+              pdfDoc, page, pIdx,
+              `UMP_PAGE_NUM_P${pIdx + 1}_${Date.now()}`,
+              pageNumPngBytes, pW - numW - 28, 16, numW, numH
+            );
+          }
         }
 
-        // ĐÓNG DẤU GIÁP LAI TỰ ĐỘNG NẾU VĂN BẢN CÓ TỪ 2 TRANG TRỞ LÊN
+        // ĐÓNG DẤU GIÁP LAI THEO NGUYÊN TẮC TỐI ĐA 5 TRANG / 1 LẦN (SANG TRANG 6 GIÁP LAI LẠI)
         if (pages.length >= 2) {
           if (driveSignaturesCache.length === 0) {
             const sigRes = await fetch(GXN_API_URL, {
@@ -1405,25 +1439,49 @@
           });
 
           if (giapLaiItem && giapLaiItem.dataUrl) {
-            const slices = await buildGiapLaiSlices(giapLaiItem.dataUrl, pages.length);
+            const MAX_PAGES_PER_SEAL = 5;
             const fullSealDiameter = 96; // Đường kính ~34mm chuẩn dấu Đoàn - Hội
-            const slicePdfW = fullSealDiameter / pages.length;
-            const slicePdfH = fullSealDiameter;
 
-            for (let pIdx = 0; pIdx < pages.length; pIdx++) {
-              if (!slices[pIdx]) continue;
-              const page = pages[pIdx];
-              const { width: pW, height: pH } = page.getSize();
-              // Tạo độ xòe giấy tự nhiên ~1.5pt mỗi trang và đặt ở 1/3 trên mép phải
-              const fanOffsetY = (pIdx - (pages.length - 1) / 2) * 1.8;
-              const gx = pW - slicePdfW - 1;
-              const gy = (pH * 0.60) - (slicePdfH / 2) + fanOffsetY;
+            // Chia danh sách trang thành từng nhóm tối đa 5 trang (VD: 7 trang -> cụm 1: trang 1-5, cụm 2: trang 6-7)
+            let pageGroups = [];
+            for (let start = 0; start < pages.length; start += MAX_PAGES_PER_SEAL) {
+              const end = Math.min(start + MAX_PAGES_PER_SEAL, pages.length);
+              // Nếu cụm cuối chỉ lẻ đúng 1 trang (VD: tổng 6 trang -> 5 + 1), gộp trang 6 chung với trang 5 để tạo cụm giáp lai 2 trang
+              if (end - start === 1 && pageGroups.length > 0) {
+                pageGroups[pageGroups.length - 1].push(start);
+              } else {
+                const grp = [];
+                for (let p = start; p < end; p++) grp.push(p);
+                pageGroups.push(grp);
+              }
+            }
 
-              await embedLockedWidgetAnnotation(
-                pdfDoc, page, pIdx,
-                `UMP_GIAP_LAI_P${pIdx + 1}_${Date.now()}`,
-                slices[pIdx].bytes, gx, gy, slicePdfW, slicePdfH
-              );
+            for (let gIdx = 0; gIdx < pageGroups.length; gIdx++) {
+              const groupPages = pageGroups[gIdx];
+              const groupCount = groupPages.length;
+              const slices = await buildGiapLaiSlices(giapLaiItem.dataUrl, groupCount);
+              const slicePdfW = fullSealDiameter / groupCount;
+              const slicePdfH = fullSealDiameter;
+
+              // Mỗi cụm 5 trang dịch nhẹ vị trí dọc xuống dưới 1 đoạn (~115pt) để các đợt giáp lai không đè trùng nhau
+              const batchVerticalShift = gIdx * 115;
+
+              for (let idxInGroup = 0; idxInGroup < groupCount; idxInGroup++) {
+                if (!slices[idxInGroup]) continue;
+                const actualPageIdx = groupPages[idxInGroup];
+                const page = pages[actualPageIdx];
+                const { width: pW, height: pH } = page.getSize();
+
+                const fanOffsetY = (idxInGroup - (groupCount - 1) / 2) * 1.8;
+                const gx = pW - slicePdfW - 1;
+                const gy = Math.max(80, (pH * 0.64) - (slicePdfH / 2) - batchVerticalShift + fanOffsetY);
+
+                await embedLockedWidgetAnnotation(
+                  pdfDoc, page, actualPageIdx,
+                  `UMP_GIAP_LAI_G${gIdx + 1}_P${actualPageIdx + 1}_${Date.now()}`,
+                  slices[idxInGroup].bytes, gx, gy, slicePdfW, slicePdfH
+                );
+              }
             }
           }
         }
