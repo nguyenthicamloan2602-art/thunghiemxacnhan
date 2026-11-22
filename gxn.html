@@ -36,20 +36,20 @@
       border: none;
     }
 
-    /* Chế độ mở rộng tối đa diện tích soạn thảo cho CTV: ẩn thanh tiêu đề trên, cột trang trái, thanh phải và ghi chú đáy */
+    /* Chế độ mở rộng tối đa cho CTV: che viền trang trái + ô Font chữ, bắt đầu từ cỡ chữ (- 17 +) và phóng to vừa khít tờ giấy */
     .slide-preview-container.ctv-editor-mode {
       width: 100% !important;
-      height: 700px !important;
+      height: 720px !important;
       overflow: hidden;
     }
     .slide-preview-container.ctv-editor-mode iframe {
       position: absolute;
-      top: -54px;     /* Ẩn thanh tiêu đề "Bản trình chiếu / Chia sẻ" phía trên */
-      left: -165px;   /* Ẩn cột danh sách trang thu nhỏ bên trái */
-      width: calc(100% + 235px);  /* Kéo tràn sang phải để ẩn thanh "Nội dung / Tải lên / Ghi" */
-      height: calc(100% + 125px); /* Kéo tràn xuống dưới để ẩn ô "Nhấp để thêm ghi chú" */
+      top: -96px;                  /* Ẩn hàng công cụ trên cùng, giữ lại đúng hàng cỡ chữ (- 17 +) */
+      left: -265px;                /* Che hẳn mép cột trang bên trái và ô tên Font chữ */
+      width: calc(100% + 335px);   /* Kéo tràn sang phải để tờ giấy giãn to vừa khít khung nhìn */
+      height: calc(100% + 165px);  /* Kéo tràn xuống đáy để che sạch vùng trống dưới chân trang */
     }
-    
+
     .stamp-box {
       position: absolute;
       touch-action: none;
