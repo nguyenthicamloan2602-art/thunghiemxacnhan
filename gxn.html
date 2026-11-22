@@ -443,12 +443,15 @@
       const container = document.getElementById('savedSignaturesContainer');
       if (!container) return;
 
-      if (driveSignaturesCache.length === 0) {
+      // Lọc bỏ file dấu giáp lai khỏi danh sách chọn chữ ký cá nhân (vì giáp lai tự động đóng khi duyệt)
+      const personalSigs = driveSignaturesCache.filter(item => !normalizeStr(item.name).includes("giap lai"));
+
+      if (personalSigs.length === 0) {
         container.innerHTML = '<div class="text-center text-slate-400 py-4 text-[11px] italic">Chưa có mẫu chữ ký nào trong thư mục Drive.</div>';
         return;
       }
 
-      container.innerHTML = driveSignaturesCache.map(item => `
+      container.innerHTML = personalSigs.map(item => `
         <div class="flex items-center justify-between gap-2 p-2 rounded-xl border border-slate-200/80 bg-slate-50/60 hover:bg-indigo-50/40 transition">
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center p-1 shrink-0 overflow-hidden">
@@ -1753,7 +1756,8 @@
       }
 
       const adminNameNorm = normalizeStr(currentAdmin.name);
-      const matchedSig = driveSignaturesCache.find(s => normalizeStr(s.name).includes(adminNameNorm)) || driveSignaturesCache[0];
+      const personalSigs = driveSignaturesCache.filter(s => !normalizeStr(s.name).includes("giap lai"));
+      const matchedSig = personalSigs.find(s => normalizeStr(s.name).includes(adminNameNorm)) || personalSigs[0];
       if (!matchedSig) return;
 
       const canvasEl = document.getElementById('slideContainerWrapper');
