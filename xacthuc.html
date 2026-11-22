@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xác thực Giấy xác nhận hoạt động</title>
+  <style>
+    body { background: #fff; color: #1e293b; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 24px 16px; line-height: 1.6; }
+    .container { max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 16px; text-transform: uppercase; color: #0369a1; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 18px; }
+    .info-row { margin-bottom: 10px; font-size: 14.5px; }
+    .label { font-weight: 700; color: #0f172a; }
+    h2 { font-size: 14.5px; text-transform: uppercase; color: #0369a1; margin-top: 22px; margin-bottom: 10px; }
+    ol { padding-left: 20px; margin: 0; font-size: 14px; }
+    li { margin-bottom: 8px; }
+    .sub { color: #64748b; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container" id="content">⏳ Đang kiểm tra dữ liệu xác thực...</div>
+  <script>
+    const GXN_API_URL = "https://script.google.com/macros/s/AKfycbwF5IVHxFXmM-gEoNEBP_j_qbS__q3EYKYKXAWmm1xuci7wUEmr4GeUaiQkrhrVrrp3/exec";
+    const id = new URLSearchParams(window.location.search).get('id');
+
+    if (!id) {
+      document.getElementById('content').innerHTML = '<p style="color:#dc2626;font-weight:600;">Mã QR không hợp lệ.</p>';
+    } else {
+      fetch(GXN_API_URL, { method: "POST", body: JSON.stringify({ action: "verifyGxn", id: id }) })
+        .then(r => r.json())
+        .then(res => {
+          if (!res.success) throw new Error(res.error);
+          const d = res.data;
+          const actHtml = (d.hd || []).map(item => `
+            <li>
+              <div><b>${item.t}</b></div>
+              <div class="sub">Thời gian: ${item.n || '--'} • Vai trò: ${item.v || 'Tham gia'}</div>
+            </li>
+          `).join('');
+          document.getElementById('content').innerHTML = `
+            <h1>Xác thực Giấy xác nhận hoạt động</h1>
+            <div class="info-row"><span class="label">Người duyệt:</span> ${d.qtv || '--'}</div>
+            <div class="info-row"><span class="label">Duyệt cho:</span> ${d.sv || '--'} (MSSV: ${d.mssv || '--'})</div>
+            <div class="info-row"><span class="label">Duyệt lúc:</span> ${d.tg || '--'}</div>
+            <div class="info-row"><span class="label">Số lượng hoạt động:</span> ${(d.hd || []).length} hoạt động</div>
+            <h2>Danh sách hoạt động đã duyệt</h2>
+            <ol>${actHtml}</ol>
+          `;
+        })
+        .catch(() => {
+          document.getElementById('content').innerHTML = '<p style="color:#dc2626;font-weight:600;">Không tìm thấy dữ liệu xác thực hoặc hồ sơ đã hết hiệu lực.</p>';
+        });
+    }
+  </script>
+</body>
+</html>
