@@ -1352,13 +1352,31 @@
           const tempImg = await pdfDoc.embedPng(stampPngBytes);
           const naturalRatio = tempImg.height / tempImg.width;
 
-          const scaleBoost = 1.18;
-          const rawW = (stamp.width / canvasW) * lpW;
-          const sW = rawW * scaleBoost;
-          const sH = sW * naturalRatio; // Giữ chuẩn tỷ lệ gốc của con dấu
+          // Tỷ lệ trang giấy A4 thực tế hiển thị bên trong khung preview Google Slides (trừ viền đen 2 bên & trên/dưới)
+          const pageRatio = lpW / lpH; // ~0.707
+          let innerW = canvasW;
+          let innerH = canvasH;
+          if (canvasW / canvasH > pageRatio) {
+            innerH = canvasH * 0.945;
+            innerW = innerH * pageRatio;
+          } else {
+            innerW = canvasW * 0.89;
+            innerH = innerW / pageRatio;
+          }
 
-          const posX = Math.max(0, ((stamp.x / canvasW) * lpW) - ((sW - rawW) / 2));
-          const topFromTop = Math.max(0, ((stamp.y / canvasH) * lpH) - ((sH - (rawW * naturalRatio)) / 2));
+          const padLeft = (canvasW - innerW) / 2;
+          const padTop = (canvasH - innerH) / 2;
+
+          // Quy đổi tọa độ từ khung preview sang trang giấy thật
+          const relX = (stamp.x - padLeft) / innerW;
+          const relY = (stamp.y - padTop) / innerH;
+          const relW = stamp.width / innerW;
+
+          const sW = relW * lpW;
+          const sH = sW * naturalRatio;
+
+          const posX = Math.max(0, Math.min(lpW - sW, relX * lpW));
+          const topFromTop = Math.max(0, relY * lpH);
           const pdfY = Math.max(0, lpH - topFromTop - sH);
 
           await embedLockedWidgetAnnotation(
