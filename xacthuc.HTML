@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xác thực Giấy xác nhận hoạt động</title>
+  <style>
+    body {
+      background: #ffffff;
+      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 24px 16px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 16px;
+      text-transform: uppercase;
+      color: #0369a1;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+    .info-row {
+      margin-bottom: 10px;
+      font-size: 14.5px;
+    }
+    .label {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    h2 {
+      font-size: 14.5px;
+      text-transform: uppercase;
+      color: #0369a1;
+      margin-top: 22px;
+      margin-bottom: 10px;
+    }
+    ol {
+      padding-left: 20px;
+      margin: 0;
+      font-size: 14px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .sub {
+      color: #64748b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="content">Đang tải thông tin xác thực...</div>
+
+  <script>
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get('d');
+      if (!raw) throw new Error("Thiếu dữ liệu");
+
+      // Giải mã Base64 UTF-8 an toàn
+      const binStr = atob(raw.replace(/-/g, '+').replace(/_/g, '/'));
+      const bytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+      const data = JSON.parse(new TextDecoder().decode(bytes));
+
+      const actHtml = (data.hd || []).map(item => `
+        <li>
+          <div><b>${item.t}</b></div>
+          <div class="sub">Thời gian: ${item.n || '--'} • Vai trò: ${item.v || 'Tham gia'}</div>
+        </li>
+      `).join('');
+
+      document.getElementById('content').innerHTML = `
+        <h1>Xác thực Giấy xác nhận hoạt động</h1>
+        <div class="info-row"><span class="label">Người duyệt:</span> ${data.qtv || '--'}</div>
+        <div class="info-row"><span class="label">Duyệt cho:</span> ${data.sv || '--'} (MSSV: ${data.mssv || '--'})</div>
+        <div class="info-row"><span class="label">Duyệt lúc:</span> ${data.tg || '--'}</div>
+        <div class="info-row"><span class="label">Số lượng hoạt động:</span> ${(data.hd || []).length} hoạt động</div>
+        <h2>Danh sách hoạt động đã duyệt</h2>
+        <ol>${actHtml}</ol>
+      `;
+    } catch (e) {
+      document.getElementById('content').innerHTML = '<p style="color:#dc2626;font-weight:600;">Mã QR không hợp lệ hoặc dữ liệu bị lỗi.</p>';
+    }
+  </script>
+</body>
+</html>

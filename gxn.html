@@ -1220,12 +1220,11 @@
     // PHÊ DUYỆT, ĐÓNG DẤU GIÁP LAI & KHÓA CHỮ KÝ SỐ VECTOR
     // ==============================================================
     async function generateQrPngBytes(text) {
-      const safeText = (text || "UMP-GXN-VERIFIED").toString().trim().substring(0, 220);
-      const utf8Text = unescape(encodeURIComponent(safeText));
+      const safeText = (text || "UMP-GXN-VERIFIED").toString().trim().substring(0, 2200);
       const qr = new QRious({
-        value: utf8Text,
-        size: 400,
-        level: 'M',
+        value: safeText,
+        size: 600,
+        level: 'L',
         background: '#ffffff',
         foreground: '#000000'
       });
