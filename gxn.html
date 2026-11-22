@@ -1191,8 +1191,10 @@
     // ==============================================================
     async function generateQrPngBytes(text) {
       const safeText = (text || "UMP-GXN-VERIFIED").toString().trim().substring(0, 220);
+      // Mã hóa chuẩn UTF-8 để Google Lens, Zalo và camera điện thoại đọc tiếng Việt có dấu chuẩn 100%
+      const utf8Text = unescape(encodeURIComponent(safeText));
       const qr = new QRious({
-        value: safeText,
+        value: utf8Text,
         size: 400,
         level: 'M',
         background: '#ffffff',
@@ -1202,7 +1204,7 @@
       const res = await fetch(dataUrl);
       return new Uint8Array(await res.arrayBuffer());
     }
-
+    
     async function embedLockedWidgetAnnotation(pdfDoc, page, pageIndex, fieldName, pngBytes, x, y, width, height) {
       const { PDFName, PDFNumber, PDFString } = PDFLib;
       const context = pdfDoc.context;
