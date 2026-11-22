@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG ĐOÀN - HỘI ĐH Y DƯỢC TPHCM</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  
+  <style>
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif !important; margin: 0; padding: 0; }
+    
+    html, body { 
+      min-height: 100vh; 
+      width: 100%;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #eef2ff 100%);
+      display: flex; 
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      color: #0f172a;
+    }
+
+    .wrapper {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      gap: 20px;
+    }
+
+    .app-card {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      min-height: 560px;
+      transition: all 0.4s ease;
+    }
+
+    /* TỐI ƯU GIAO DIỆN KHI SINH VIÊN ĐĂNG NHẬP */
+    .app-card.logged-in {
+      max-width: 1120px;
+      min-height: 520px;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.15), 0 0 0 1px rgba(186, 230, 253, 0.4);
+    }
+
+    .app-card.logged-in .left-panel {
+      display: none !important;
+    }
+
+    .app-card.logged-in .right-panel {
+      width: 100% !important;
+      padding: 36px 44px;
+    }
+    
+    body:has(.app-card.logged-in) .impact-section-bottom {
+      display: none !important;
+    }
+
+    /* LEFT PANEL: 1 LOGO DUY NHẤT & CỤM THỐNG KÊ NHỎ GỌN */
+    .left-panel {
+      width: 58%;
+      background: linear-gradient(180deg, rgba(240, 249, 255, 0.9) 0%, rgba(224, 242, 254, 0.85) 100%);
+      padding: 36px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-right: 1px solid rgba(226, 232, 240, 0.8);
+      position: relative;
+    }
+
+    .brand-top-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .single-logo-container {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-brand-logo {
+      height: 68px;
+      max-width: 260px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(2, 132, 199, 0.2));
+      transition: transform 0.25s ease;
+    }
+
+    .custom-brand-logo:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .brand-name { 
+      font-size: 13px; 
+      font-weight: 800; 
+      color: #0284c7; 
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+    }
+
+    .divider-star { 
+      color: #f59e0b; 
+      font-size: 13px; 
+      margin: 8px 0 6px 0;
+      animation: pulseStar 2s infinite ease-in-out;
+    }
+    @keyframes pulseStar {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+    
+    .sys-title { 
+      font-size: 16px; 
+      font-weight: 800; 
+      color: #0369a1; 
+      text-transform: uppercase; 
+      line-height: 1.35; 
+      letter-spacing: 0.5px;
+    }
+
+    .sys-slogan { 
+      font-size: 11px; 
+      color: #475569; 
+      margin-top: 5px; 
+      font-weight: 600; 
+      line-height: 1.4;
+    }
+
+    .hero-stats-container {
+      width: 100%;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed rgba(2, 132, 199, 0.2);
+    }
+
+    .hero-stats-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .hero-stats-badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .live-pulse-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ecfdf5;
+      color: #059669;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .pulse-dot-small {
+      width: 6px;
+      height: 6px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulseDotAnim 1.8s infinite;
+    }
+    @keyframes pulseDotAnim {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .stat-cards-compact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .stat-card-compact {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 12px 8px 10px 8px;
+      border: 1.5px solid #f1f5f9;
+      box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card-compact:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -4px rgba(2, 132, 199, 0.16);
+    }
+
+    .stat-card-compact::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .stat-card-compact.card-theme-blue::before { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .stat-card-compact.card-theme-green::before { background: linear-gradient(90deg, #16a34a, #4ade80); }
+    .stat-card-compact.card-theme-purple::before { background: linear-gradient(90deg, #9333ea, #c084fc); }
+
+    .stat-compact-icon {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .stat-compact-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .stat-compact-sub {
+      font-size: 9.5px;
+      color: #64748b;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .stat-circle-wrapper {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      margin: 4px auto 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-ring-svg {
+      width: 72px;
+      height: 72px;
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-bg {
+      fill: none;
+      stroke: #e2e8f0;
+      stroke-width: 5.5;
+    }
+
+    .progress-ring-bar {
+      fill: none;
+      stroke-width: 5.5;
+      stroke-linecap: round;
+      stroke-dasharray: 201.06;
+      stroke-dashoffset: 201.06;
+      transition: stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-theme-blue .progress-ring-bar { stroke: url(#blueGradient); }
+    .card-theme-green .progress-ring-bar { stroke: url(#greenGradient); }
+    .card-theme-purple .progress-ring-bar { stroke: url(#purpleGradient); }
+
+    .stat-circle-center {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .rate-val-mini {
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.3px;
+    }
+
+    .rate-sub-mini {
+      font-size: 8px;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 3px;
+      letter-spacing: 0.3px;
+    }
+
+    .card-theme-blue .rate-val-mini { color: #0284c7; }
+    .card-theme-green .rate-val-mini { color: #16a34a; }
+    .card-theme-purple .rate-val-mini { color: #9333ea; }
+
+    .stat-compact-details {
+      width: 100%;
+      border-top: 1px dashed #f1f5f9;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 10.5px;
+    }
+
+    .compact-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .compact-detail-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .compact-detail-val {
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .right-panel {
+      width: 42%;
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .user-avatar-icon {
+      width: 50px;
+      height: 50px;
+      background: #e0f2fe;
+      color: #0284c7;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
+    }
+
+    .login-title { font-size: 19px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .login-sub { font-size: 12.5px; color: #64748b; margin-bottom: 22px; font-weight: 500; }
+
+    .input-label {
+      display: block;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      margin-bottom: 6px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .form-control-custom {
+      width: 100%;
+      font-size: 14.5px;
+      padding: 12.5px 16px;
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      background-color: #f8fafc;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .form-control-custom:focus {
+      background-color: #fff;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.14);
+    }
+
+    .btn-submit-main {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #fff;
+      font-weight: 700;
+      padding: 13px;
+      font-size: 14px;
+      border-radius: 14px;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-submit-main:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.45); }
+
+    .btn-switch-role {
+      background: none;
+      border: none;
+      color: #0284c7;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+      transition: color 0.15s;
+    }
+    .btn-switch-role:hover { text-decoration: underline; color: #0369a1; }
+
+    .dashboard-box {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    .app-card.logged-in .login-box { display: none; }
+    .app-card.logged-in .dashboard-box { display: flex; }
+
+    .portal-brand-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 18px;
+      margin-bottom: 20px;
+      border-bottom: 1.5px dashed #e2e8f0;
+      text-align: left;
+    }
+
+    .brand-mini-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(2, 132, 199, 0.2));
+    }
+
+    .brand-mini-sub {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0369a1;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-mini-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.2px;
+    }
+
+    .user-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      padding: 16px 20px;
+      border-radius: 20px;
+      border: 1px solid #bae6fd;
+      margin-bottom: 22px;
+    }
+
+    .user-info-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+    }
+
+    .user-avatar-badge {
+      width: 48px;
+      height: 48px;
+      background: #ffffff;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.12);
+    }
+
+    .user-greeting {
+      font-size: 11.5px;
+      color: #0284c7;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .user-display-name {
+      font-size: 19px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 1px;
+      letter-spacing: -0.2px;
+    }
+
+    .user-meta-details {
+      font-size: 12px;
+      color: #475569;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .btn-logout-custom {
+      background: #ffffff;
+      border: 1.5px solid #fecaca;
+      color: #dc2626;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 24px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.08);
+    }
+
+    .btn-logout-custom:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      transform: translateY(-1px);
+    }
+
+    .section-title-wrapper {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .section-title-wrapper h6 {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .section-title-wrapper p {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* LƯỚI CHIA ĐỀU 4 CỘT CHUẨN ĐẸP */
+    .service-card-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 16px !important;
+      margin-bottom: 24px !important;
+      width: 100% !important;
+    }
+
+    .service-item-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 22px 14px;
+      border: 1.5px solid #f1f5f9;
+      box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      min-height: 215px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-item-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -6px rgba(2, 132, 199, 0.14);
+    }
+
+    /* THEME BỐN MÀU PASTEL CHUẨN CHO BỐN DỊCH VỤ */
+    .card-gcn-theme:hover { border-color: #7dd3fc; }
+    .card-gxn-theme:hover { border-color: #86efac; }
+    .card-clb-theme:hover { border-color: #d8b4fe; }
+    .card-hd-theme:hover { border-color: #fdba74; }
+
+    .card-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 12px auto;
+      transition: transform 0.2s ease;
+    }
+
+    .service-item-card:hover .card-icon-circle {
+      transform: scale(1.08);
+    }
+
+    /* MÀU ICON NỀN PASTEL */
+    .card-icon-blue { background: #e0f2fe; color: #0284c7; }
+    .card-icon-green { background: #dcfce7; color: #16a34a; }
+    .card-icon-purple { background: #f3e8ff; color: #9333ea; }
+    .card-icon-orange { background: #ffedd5; color: #ea580c; }
+
+    .card-title-main {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+
+    .card-desc-sub {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      min-height: 32px;
+      font-weight: 500;
+    }
+
+    .btn-action-small {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 18px;
+      text-decoration: none;
+      width: 100%;
+      display: block;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    /* MÀU NÚT PASTEL ĐỒNG BỘ */
+    .btn-action-blue { background: #e0f2fe; color: #0284c7; }
+    .btn-action-blue:hover { background: #0284c7; color: #ffffff; }
+
+    .btn-action-green { background: #dcfce7; color: #16a34a; }
+    .btn-action-green:hover { background: #16a34a; color: #ffffff; }
+
+    .btn-action-purple { background: #f3e8ff; color: #9333ea; }
+    .btn-action-purple:hover { background: #9333ea; color: #ffffff; }
+
+    .btn-action-orange { background: #ffedd5; color: #ea580c; }
+    .btn-action-orange:hover { background: #ea580c; color: #ffffff; }
+
+    /* RESPONSIVE CHO TABLET & MOBILE */
+    @media (max-width: 992px) {
+      .service-card-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 580px) {
+      .service-card-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    .support-bar {
+      background: #f8fafc;
+      padding: 12px 18px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+    }
+
+    .btn-fanpage {
+      background: #ffffff;
+      border: 1px solid #0284c7;
+      color: #0284c7;
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-fanpage:hover {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .impact-section-bottom {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .impact-summary-strip {
+      background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+      border-radius: 20px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      box-shadow: 0 12px 28px -6px rgba(2, 132, 199, 0.35);
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .summary-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .summary-icon {
+      font-size: 24px;
+      background: rgba(255, 255, 255, 0.16);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .summary-text h6 {
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .summary-text p {
+      font-size: 12px;
+      opacity: 0.88;
+      margin-top: 2px;
+    }
+
+    .summary-stats-pills {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .summary-pill {
+      text-align: right;
+    }
+
+    .summary-pill-label {
+      font-size: 10.5px;
+      opacity: 0.82;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .summary-pill-value {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .portal-footer {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 20px 24px 20px;
+      color: #64748b;
+      font-size: 11.5px;
+      text-align: center;
+    }
+
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      text-align: left;
+      gap: 20px;
+      border-bottom: 1px solid rgba(2, 132, 199, 0.15);
+      padding-bottom: 12px;
+      margin-bottom: 10px;
+    }
+
+    .f-header {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #0369a1;
+    }
+
+    .portal-footer a { color: #0284c7; text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 960px) {
+      .app-card { flex-direction: column; width: 100%; }
+      .left-panel, .right-panel { width: 100%; }
+      .impact-summary-strip { flex-direction: column; align-items: flex-start; }
+      .summary-stats-pills { width: 100%; justify-content: space-between; }
+      .summary-pill { text-align: left; }
+      .footer-grid { flex-direction: column; }
+    }
+
+    @media (max-width: 640px) {
+      .stat-cards-compact-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SVG GRADIENTS CHO VÒNG TRÒN TIẾN ĐỘ -->
+  <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+    <defs>
+      <linearGradient id="blueGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8"></stop>
+        <stop offset="100%" stop-color="#0284c7"></stop>
+      </linearGradient>
+      <linearGradient id="greenGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+        <stop offset="0%" stop-color="#4ade80"></stop>
+        <stop offset="100%" stop-color="#16a34a"></stop>
+      </linearGradient>
+      <linearGradient id="purpleGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+        <stop offset="0%" stop-color="#c084fc"></stop>
+        <stop offset="100%" stop-color="#9333ea"></stop>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wrapper">
+    <!-- KHỐI CARD CHÍNH -->
+    <div class="app-card" id="appCard">
+      
+      <!-- Panel bên trái: 1 HÌNH LOGO DUY NHẤT & 3 Ô SỐ LIỆU -->
+      <div class="left-panel">
+        <div class="brand-top-section">
+          
+          <!-- 1 HÌNH LOGO DUY NHẤT -->
+          <div class="single-logo-container">
+            <img src="logo.png" 
+                 alt="Logo Đại học Y Dược TP.HCM" 
+                 class="custom-brand-logo" 
+                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Logo_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_Y_D%C6%B0%E1%BB%A3c_TP.HCM.png/640px-Logo_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_Y_D%C6%B0%E1%BB%A3c_TP.HCM.png'"/>
+          </div>
+
+          <div class="brand-name">
+            ĐOÀN THANH NIÊN – HỘI SINH VIÊN<br/>
+            <strong>ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</strong>
+          </div>
+          <div class="divider-star">✦</div>
+          <div class="sys-title">HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG</div>
+          <div class="sys-slogan">Chuyên nghiệp – Xuất sắc – Sáng tạo – Phụng sự – Nhân văn</div>
+        </div>
+
+        <!-- 3 Ô SỐ LIỆU GỌN GÀNG NGAY DƯỚI KHẨU HIỆU -->
+        <div class="hero-stats-container">
+          <div class="hero-stats-header">
+            <span class="hero-stats-badge">📊 Thống kê tiếp nhận &amp; phục vụ</span>
+            <div class="live-pulse-badge">
+              <span class="pulse-dot-small"></span>
+              <span>Trực tuyến 24/7</span>
+            </div>
+          </div>
+
+          <div class="stat-cards-compact-grid">
+            <!-- Ô 1: GIẤY CHỨNG NHẬN -->
+            <div class="stat-card-compact card-theme-blue">
+              <div class="stat-compact-icon">📜</div>
+              <div class="stat-compact-title">Giấy chứng nhận</div>
+              <div class="stat-compact-sub">Thanh niên khỏe</div>
+              
+              <div class="stat-circle-wrapper">
+                <svg class="progress-ring-svg" viewBox="0 0 72 72">
+                  <circle class="progress-ring-bg" cx="36" cy="36" r="32"></circle>
+                  <circle class="progress-ring-bar" cx="36" cy="36" id="gcnCircleBar" r="32"></circle>
+                </svg>
+                <div class="stat-circle-center">
+                  <span class="rate-val-mini" id="gcnRateNum">100%</span>
+                  <span class="rate-sub-mini">Hoàn thành</span>
+                </div>
+              </div>
+
+              <div class="stat-compact-details">
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Tổng yêu cầu</span>
+                  <span class="compact-detail-val" id="gcnTotalNum">Đang cập nhật...</span>
+                </div>
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Đã duyệt &amp; cấp</span>
+                  <span class="compact-detail-val" id="gcnApprovedNum" style="color: #0284c7;">Đang cập nhật...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ô 2: GIẤY XÁC NHẬN -->
+            <div class="stat-card-compact card-theme-green">
+              <div class="stat-compact-icon">📋</div>
+              <div class="stat-compact-title">Giấy xác nhận</div>
+              <div class="stat-compact-sub">Đoàn - Hội cấp ĐH</div>
+              
+              <div class="stat-circle-wrapper">
+                <svg class="progress-ring-svg" viewBox="0 0 72 72">
+                  <circle class="progress-ring-bg" cx="36" cy="36" r="32"></circle>
+                  <circle class="progress-ring-bar" cx="36" cy="36" id="gxnCircleBar" r="32"></circle>
+                </svg>
+                <div class="stat-circle-center">
+                  <span class="rate-val-mini" id="gxnRateNum">--%</span>
+                  <span class="rate-sub-mini">Hoàn thành</span>
+                </div>
+              </div>
+
+              <div class="stat-compact-details">
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Tổng yêu cầu</span>
+                  <span class="compact-detail-val" id="gxnTotalNum">Đang cập nhật...</span>
+                </div>
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Đã duyệt &amp; cấp</span>
+                  <span class="compact-detail-val" id="gxnApprovedNum" style="color: #16a34a;">Đang cập nhật...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ô 3: TIỆN ÍCH KHÁC -->
+            <div class="stat-card-compact card-theme-purple">
+              <div class="stat-compact-icon">📂</div>
+              <div class="stat-compact-title">Tiện ích khác</div>
+              <div class="stat-compact-sub">CLB, Đội, Nhóm</div>
+              
+              <div class="stat-circle-wrapper">
+                <svg class="progress-ring-svg" viewBox="0 0 72 72">
+                  <circle class="progress-ring-bg" cx="36" cy="36" r="32"></circle>
+                  <circle class="progress-ring-bar" cx="36" cy="36" id="clbCircleBar" r="32"></circle>
+                </svg>
+                <div class="stat-circle-center">
+                  <span class="rate-val-mini" id="clbRateNum">--%</span>
+                  <span class="rate-sub-mini">Hoàn thành</span>
+                </div>
+              </div>
+
+              <div class="stat-compact-details">
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Tổng yêu cầu</span>
+                  <span class="compact-detail-val" id="clbTotalNum">Đang cập nhật...</span>
+                </div>
+                <div class="compact-detail-row">
+                  <span class="compact-detail-label">Đã duyệt &amp; cấp</span>
+                  <span class="compact-detail-val" id="clbApprovedNum" style="color: #9333ea;">Đang cập nhật...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Panel bên phải: ĐĂNG NHẬP / DASHBOARD -->
+      <div class="right-panel">
+        <div class="login-box">
+          <!-- FORM 1: ĐĂNG NHẬP SINH VIÊN -->
+          <div id="studentForm">
+            <div class="user-avatar-icon">👤</div>
+            <div class="login-title">ĐĂNG NHẬP SINH VIÊN</div>
+            <div class="login-sub">Nhập mã số sinh viên để tiếp tục tra cứu</div>
+
+            <label class="input-label">MÃ SỐ SINH VIÊN (MSSV)</label>
+            <input autocomplete="off" class="form-control-custom" id="mssvInput" placeholder="Ví dụ: 2153010xxx..." type="text"/>
+
+            <button class="btn-submit-main" id="btnSubmit" onclick="handleSearch()">
+              <span>ĐĂNG NHẬP HỆ THỐNG</span>
+              <span>→</span>
+            </button>
+
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 18px; padding-top: 12px;">
+              <button class="btn-switch-role" onclick="switchLoginForm('admin')">
+                🔑 Đăng nhập với vai trò khác...
+              </button>
+            </div>
+          </div>
+
+          <!-- FORM 2: ĐĂNG NHẬP CÁN BỘ / QUẢN TRỊ / CTV -->
+          <div id="adminForm" style="display: none;">
+            <div class="user-avatar-icon" style="background: rgb(255, 251, 227); color: rgb(217, 119, 6);">🔐</div>
+            <div class="login-title" style="color: rgb(217, 119, 6);">ĐĂNG NHẬP QUẢN TRỊ</div>
+            <div class="login-sub">Dành cho Cán bộ Văn phòng Đoàn - Hội, QTV, CTV</div>
+
+            <label class="input-label">TÊN ĐĂNG NHẬP</label>
+            <input class="form-control-custom" id="adminUser" placeholder="Tài khoản cán bộ..." type="text"/>
+
+            <label class="input-label">MẬT KHẨU</label>
+            <input class="form-control-custom" id="adminPass" placeholder="••••••••" type="password"/>
+
+            <button class="btn-submit-main" id="btnAdminSubmit" onclick="handleAdminLoginFromPortal()" style="background: linear-gradient(135deg, rgb(217, 119, 6) 0%, rgb(180, 83, 9) 100%); box-shadow: rgba(217, 119, 6, 0.35) 0px 8px 20px -4px;">
+              ĐĂNG NHẬP QUẢN TRỊ →
+            </button>
+
+            <div id="adminLoginStatus" style="font-size: 12px; color: #b45309; text-align: center; font-weight: 600; margin-top: 10px;"></div>
+
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 16px; padding-top: 10px;">
+              <button class="btn-switch-role" onclick="switchLoginForm('student')" style="color: rgb(100, 116, 139);">
+                ← Quay lại Đăng nhập Sinh viên
+              </button>
+            </div>
+          </div>
+
+          <div id="loadingStatus" style="display: none; font-size: 12px; color: rgb(2, 132, 199); margin-top: 12px; font-weight: 600;">
+            ⏳ Đang kiểm tra dữ liệu sinh viên...
+          </div>
+        </div>
+
+        <!-- DASHBOARD MENU SINH VIÊN KHI ĐÃ ĐĂNG NHẬP -->
+        <div class="dashboard-box">
+          <div>
+            <!-- THANH THƯƠNG HIỆU MINI -->
+            <div class="portal-brand-header">
+              <img src="logo.png" alt="Logo UMP" class="brand-mini-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Logo_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_Y_D%C6%B0%E1%BB%A3c_TP.HCM.png/640px-Logo_%C4%90%E1%BA%A1i_h%E1%BB%8Dc_Y_D%C6%B0%E1%BB%A3c_TP.HCM.png'">
+              <div class="brand-mini-text">
+                <div class="brand-mini-sub">ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</div>
+                <div class="brand-mini-title">CỔNG TIỆN ÍCH DỊCH VỤ TRỰC TUYẾN</div>
+              </div>
+            </div>
+
+            <!-- KHỐI THÔNG TIN SINH VIÊN -->
+            <div class="user-header-bar">
+              <div class="user-info-group">
+                <div class="user-avatar-badge">🎓</div>
+                <div>
+                  <div class="user-greeting">Xin chào sinh viên,</div>
+                  <h4 id="svName" class="user-display-name">Sinh viên Y Dược</h4>
+                  <div id="svClass" class="user-meta-details">MSSV: --</div>
+                </div>
+              </div>
+
+              <button onclick="handleLogout()" class="btn-logout-custom">
+                🚪 Đăng xuất
+              </button>
+            </div>
+
+            <!-- TIÊU ĐỀ KHU VỰC -->
+            <div class="section-title-wrapper">
+              <h6>Danh mục dịch vụ khả dụng</h6>
+              <p>Chọn dịch vụ cần tra cứu hồ sơ hoặc cấp giấy trực tuyến</p>
+            </div>
+
+            <div class="service-card-grid">
+              <!-- Card 1: GCN -->
+              <div class="service-item-card card-gcn-theme">
+                <div>
+                  <div class="card-icon-circle card-icon-blue">📜</div>
+                  <div class="card-title-main">Giấy chứng nhận</div>
+                  <div class="card-desc-sub">Thanh niên khỏe</div>
+                </div>
+                <a class="btn-action-small btn-action-blue" href="#" onclick="goToService(event, 'gcn')">Truy cập ngay →</a>
+              </div>
+
+              <!-- Card 2: GXN -->
+              <div class="service-item-card card-gxn-theme">
+                <div>
+                  <div class="card-icon-circle card-icon-green">📋</div>
+                  <div class="card-title-main">Giấy xác nhận</div>
+                  <div class="card-desc-sub">Hoạt động Đoàn - Hội ĐH Y Dược TPHCM</div>
+                </div>
+                <a class="btn-action-small btn-action-green" href="#" onclick="goToService(event, 'gxn')">Truy cập ngay →</a>
+              </div>
+
+              <!-- Card 3: Tiện ích khác -->
+              <div class="service-item-card card-clb-theme">
+                <div>
+                  <div class="card-icon-circle card-icon-purple">📂</div>
+                  <div class="card-title-main">Tiện ích khác</div>
+                  <div class="card-desc-sub">CLB, Đội, Nhóm & Trung tâm chuyên môn</div>
+                </div>
+                <a class="btn-action-small btn-action-purple" href="#" onclick="goToService(event, 'other')">Truy cập ngay →</a>
+              </div>
+
+              <!-- Card 4: Quản lý hoạt động -->
+              <div class="service-item-card card-hd-theme">
+                <div>
+                  <div class="card-icon-circle card-icon-orange">🎯</div>
+                  <div class="card-title-main">Quản lý hoạt động</div>
+                  <div class="card-desc-sub">Các hoạt động huy động lực lượng trực tiếp</div>
+                </div>
+                <a class="btn-action-small btn-action-orange" href="#" onclick="goToService(event, 'hoatdong')">Truy cập ngay →</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-bar">
+            <div>
+              <strong style="color: #0284c7; font-size: 12px;">🎧 Hỗ trợ sinh viên</strong>
+              <div style="color: #64748b; font-size: 11.5px;">Văn phòng Đoàn - Hội: <a href="mailto:vpdhump@gmail.com" style="color: #0284c7; font-weight: 700; text-decoration: none;">vpdhump@gmail.com</a></div>
+            </div>
+            <a href="https://www.facebook.com/TuoitreYDuoc" class="btn-fanpage" target="_blank">
+              Tuổi trẻ Y Dược ↗
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- KHỐI SỐ HÓA DỊCH VỤ HỖ TRỢ SINH VIÊN Ở DƯỚI -->
+    <section class="impact-section-bottom">
+      <div class="impact-summary-strip">
+        <div class="summary-left">
+          <div class="summary-icon">⚡</div>
+          <div class="summary-text">
+            <h6>Số hóa dịch vụ hỗ trợ Sinh viên Đại học Y Dược TP. Hồ Chí Minh</h6>
+            <p>Tra cứu nhanh chóng, minh bạch và tiện ích</p>
+          </div>
+        </div>
+        <div class="summary-stats-pills">
+          <div class="summary-pill">
+            <div class="summary-pill-label">Tổng lượt phục vụ</div>
+            <div class="summary-pill-value" id="summaryTotalServices">...</div>
+          </div>
+          <div style="width: 1px; height: 32px; background: rgba(255,255,255,0.25);"></div>
+          <div class="summary-pill">
+            <div class="summary-pill-label">Sinh viên thụ hưởng</div>
+            <div class="summary-pill-value">14.500+</div>
+          </div>
+          <div style="width: 1px; height: 32px; background: rgba(255,255,255,0.25);"></div>
+          <div class="summary-pill">
+            <div class="summary-pill-label">Tỷ lệ mục tiêu</div>
+            <div class="summary-pill-value" id="summaryTargetRate">...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- CHÂN TRANG -->
+  <footer class="portal-footer" id="portalFooter">
+    <div class="footer-grid">
+      <div>
+        <div class="f-header">HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG</div>
+        <div>ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TPHCM</div>
+      </div>
+      <div>
+        <div class="f-header">📍 ĐỊA CHỈ</div>
+        <div>• 540 Ngô Gia Tự, Phường An Đông, TP. HCM</div>
+        <div>• 217 Hồng Bàng, Phường Chợ Lớn, TP. HCM</div>
+      </div>
+      <div>
+        <div class="f-header">📧 LIÊN HỆ &amp; HỖ TRỢ</div>
+        <div>• Đoàn - Hội: <a href="mailto:vpdhump@gmail.com">vpdhump@gmail.com</a></div>
+        <div>• Fanpage: <a href="https://www.facebook.com/tuoitreyduochcm" target="_blank">Tuổi trẻ Y Dược</a></div>
+      </div>
+    </div>
+    <div style="font-weight: 700; color: rgb(71, 85, 105);">© 2026 VĂN PHÒNG ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</div>
+    <div style="font-style: italic; opacity: 0.8; font-size: 10.5px; margin-top: 3px;">The website was developed by NTCL team</div>
+  </footer>
+
+  <script>
+    const SERVICE_LOCK_CONFIG = {
+      gcn: false,
+      gxn: false,
+      other: false
+    };
+
+    const API_GATEWAY_URL = "https://script.google.com/macros/s/AKfycbwhHMEz7Cgor98xp5Yo4s-FuGDrZacxeDAIXOuNlEM1OBoGBV3rPteLK1W7wKc2hSH1sQ/exec";
+    const GXN_API_URL = "https://script.google.com/macros/s/AKfycbwF5IVHxFXmM-gEoNEBP_j_qbS__q3EYKYKXAWmm1xuci7wUEmr4GeUaiQkrhrVrrp3/exec";
+    
+    let validMSSV = "";
+    let studentInfoData = null;
+
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 32;
+
+    function updateProgressRing(circleId, textId, targetPercent) {
+      const circle = document.getElementById(circleId);
+      const text = document.getElementById(textId);
+      
+      const percent = Math.min(Math.max(parseFloat(targetPercent) || 0, 0), 100);
+      const targetOffset = CIRCLE_CIRCUMFERENCE - (percent / 100) * CIRCLE_CIRCUMFERENCE;
+
+      if (circle) {
+        circle.style.strokeDasharray = CIRCLE_CIRCUMFERENCE;
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            circle.style.strokeDashoffset = targetOffset;
+          }, 60);
+        });
+      }
+
+      if (text) {
+        let start = 0;
+        const duration = 1000;
+        const startTime = performance.now();
+
+        function animateCount(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const currentVal = (start + (percent - start) * easeOut);
+          
+          text.textContent = (percent % 1 === 0 ? Math.round(currentVal) : currentVal.toFixed(1)) + '%';
+
+          if (progress < 1) {
+            requestAnimationFrame(animateCount);
+          } else {
+            text.textContent = (percent % 1 === 0 ? percent : percent.toFixed(1)) + '%';
+          }
+        }
+        requestAnimationFrame(animateCount);
+      }
+    }
+
+    function applyServiceLocks() {
+      const serviceKeys = ['gcn', 'gxn', 'other'];
+
+      serviceKeys.forEach(key => {
+        const btn = document.querySelector(`a[onclick*="'${key}'"]`);
+        if (!btn) return;
+
+        const card = btn.closest('.service-item-card');
+
+        if (SERVICE_LOCK_CONFIG[key]) {
+          btn.innerText = "Tạm khóa 🔒";
+          btn.style.background = "#f1f5f9";
+          btn.style.color = "#94a3b8";
+          btn.style.cursor = "not-allowed";
+          btn.style.border = "1px solid #e2e8f0";
+          btn.style.boxShadow = "none";
+          
+          if (card) {
+            card.style.opacity = "0.6";
+            card.style.filter = "grayscale(25%)";
+          }
+        } else {
+          btn.innerHTML = "Truy cập ngay &rarr;";
+          btn.style.cursor = "pointer";
+          btn.style.boxShadow = "";
+          btn.style.border = "none";
+
+          if (key === 'gcn') {
+            btn.style.background = "#f0f9ff";
+            btn.style.color = "#0284c7";
+          } else if (key === 'gxn') {
+            btn.style.background = "#f0fdf4";
+            btn.style.color = "#16a34a";
+          } else {
+            btn.style.background = "#faf5ff";
+            btn.style.color = "#9333ea";
+          }
+
+          if (card) {
+            card.style.opacity = "1";
+            card.style.filter = "none";
+          }
+        }
+      });
+    }
+
+    function switchLoginForm(type) {
+      if (type === 'admin') {
+        document.getElementById('studentForm').style.display = 'none';
+        document.getElementById('adminForm').style.display = 'block';
+      } else {
+        document.getElementById('adminForm').style.display = 'none';
+        document.getElementById('studentForm').style.display = 'block';
+      }
+    }
+
+    // TẢI VÀ TÍNH TOÁN SỐ LIỆU REALTIME
+    function loadLiveStats() {
+      fetch(API_GATEWAY_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getPublicStats" })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.stats) {
+          const s = res.stats;
+          
+          let totalReqSum = 0;
+          let totalApprovedSum = 0;
+
+          // 1. Thẻ Giấy chứng nhận (GCN)
+          if (s.gcn) {
+            const gcnRate = parseFloat(s.gcn.rate) || 100.0;
+            const elTotal = document.getElementById('gcnTotalNum');
+            const elApp = document.getElementById('gcnApprovedNum');
+
+            if (elTotal) elTotal.textContent = Number(s.gcn.total).toLocaleString('vi-VN');
+            if (elApp) elApp.textContent = Number(s.gcn.approved).toLocaleString('vi-VN');
+            updateProgressRing('gcnCircleBar', 'gcnRateNum', gcnRate);
+
+            totalReqSum += Number(s.gcn.total || 0);
+            totalApprovedSum += Number(s.gcn.approved || 0);
+          }
+
+          // 2. Thẻ Giấy xác nhận (GXN)
+          if (s.gxn) {
+            const gxnRate = parseFloat(s.gxn.rate) || 0;
+            const elTotal = document.getElementById('gxnTotalNum');
+            const elApp = document.getElementById('gxnApprovedNum');
+
+            if (elTotal) elTotal.textContent = Number(s.gxn.total).toLocaleString('vi-VN');
+            if (elApp) elApp.textContent = Number(s.gxn.approved).toLocaleString('vi-VN');
+            updateProgressRing('gxnCircleBar', 'gxnRateNum', gxnRate);
+
+            totalReqSum += Number(s.gxn.total || 0);
+            totalApprovedSum += Number(s.gxn.approved || 0);
+          }
+
+          // 3. Thẻ Biểu mẫu & Tiện ích khác (CLB)
+          if (s.other) {
+            const clbRate = parseFloat(s.other.rate) || 0;
+            const elClbTotal = document.getElementById('clbTotalNum');
+            const elClbApp = document.getElementById('clbApprovedNum');
+
+            if (elClbTotal) elClbTotal.textContent = Number(s.other.total).toLocaleString('vi-VN');
+            if (elClbApp) elClbApp.textContent = Number(s.other.approved).toLocaleString('vi-VN');
+            updateProgressRing('clbCircleBar', 'clbRateNum', clbRate);
+
+            totalReqSum += Number(s.other.total || 0);
+            totalApprovedSum += Number(s.other.approved || 0);
+          }
+
+          // 4. Banner tổng hợp
+          const summaryTotalEl = document.getElementById('summaryTotalServices');
+          const summaryRateEl = document.getElementById('summaryTargetRate');
+
+          if (summaryTotalEl && totalReqSum > 0) {
+            summaryTotalEl.textContent = totalReqSum.toLocaleString('vi-VN') + "+";
+          }
+
+          if (summaryRateEl && totalReqSum > 0) {
+            const targetRate = ((totalApprovedSum / totalReqSum) * 100).toFixed(1);
+            summaryRateEl.textContent = targetRate + "%";
+          }
+        }
+      })
+      .catch(err => {
+        console.warn("Chưa tải được thống kê realtime:", err);
+        updateProgressRing('gcnCircleBar', 'gcnRateNum', 100);
+        updateProgressRing('gxnCircleBar', 'gxnRateNum', 95.6);
+        updateProgressRing('clbCircleBar', 'clbRateNum', 98.7);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyServiceLocks();
+      loadLiveStats();
+
+      const savedStudent = sessionStorage.getItem('loggedStudent');
+      if (savedStudent) {
+        studentInfoData = JSON.parse(savedStudent);
+        validMSSV = studentInfoData.mssv;
+
+        document.getElementById('svName').innerText = studentInfoData.hoTen || studentInfoData.ten || "Sinh viên Y Dược";
+        document.getElementById('svClass').innerText = "MSSV: " + studentInfoData.mssv + " | Lớp: " + (studentInfoData.lop || "--") + " | Trường/Khoa: " + (studentInfoData.truongKhoa || studentInfoData.khoa || "Đại học Y Dược TP.HCM");
+        
+        document.getElementById('appCard').classList.add('logged-in');
+      }
+    });
+
+    function handleSearch() {
+      const mssv = document.getElementById('mssvInput').value.trim();
+      const btn = document.getElementById('btnSubmit');
+      const loader = document.getElementById('loadingStatus');
+
+      if (!mssv) { 
+        alert("Vui lòng nhập Mã số sinh viên!"); 
+        return; 
+      }
+
+      btn.disabled = true;
+      btn.style.opacity = "0.75";
+      btn.style.cursor = "not-allowed";
+      btn.innerHTML = `<span>⏳ ĐANG XÁC THỰC...</span>`;
+      
+      if (loader) loader.style.display = 'block';
+
+      fetch(API_GATEWAY_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "checkMSSV", mssv: mssv })
+      })
+      .then(res => res.json())
+      .then(response => {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        btn.innerHTML = `<span>ĐĂNG NHẬP HỆ THỐNG</span><span>&rarr;</span>`;
+        if (loader) loader.style.display = 'none';
+
+        if (response.success) {
+          validMSSV = response.mssv;
+          studentInfoData = response;
+
+          sessionStorage.setItem('loggedStudent', JSON.stringify(response));
+
+          document.getElementById('svName').innerText = response.hoTen || response.ten || "Sinh viên Y Dược";
+          document.getElementById('svClass').innerText = "MSSV: " + response.mssv + " | Lớp: " + (response.lop || "--") + " | Trường/Khoa: " + (response.truongKhoa || response.khoa || "Đại học Y Dược TP.HCM");
+          
+          document.getElementById('appCard').classList.add('logged-in');
+        } else {
+          alert(response.message || "Không tìm thấy thông tin sinh viên!");
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        btn.innerHTML = `<span>ĐĂNG NHẬP HỆ THỐNG</span><span>&rarr;</span>`;
+        if (loader) loader.style.display = 'none';
+        alert("Lỗi kết nối máy chủ API!");
+      });
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('loggedAdmin');
+      validMSSV = "";
+      studentInfoData = null;
+      sessionStorage.removeItem('loggedStudent');
+      document.getElementById('mssvInput').value = "";
+      document.getElementById('appCard').classList.remove('logged-in');
+    }
+
+    function handleAdminLoginFromPortal() {
+      const userEl = document.getElementById('adminUser');
+      const passEl = document.getElementById('adminPass');
+      const btn = document.getElementById('btnAdminSubmit');
+      const statusEl = document.getElementById('adminLoginStatus') || document.getElementById('loadingStatus');
+
+      const user = userEl ? userEl.value.trim() : "";
+      const pass = passEl ? passEl.value : "";
+
+      if (!user || !pass) { 
+        alert("Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu!"); 
+        return; 
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        btn.innerText = "ĐANG KIỂM TRA...";
+      }
+      if (statusEl) statusEl.innerText = "Đang kết nối máy chủ...";
+
+      fetch(GXN_API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "login",
+          username: user,
+          password: pass,
+          isCtv: true
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.innerText = "ĐĂNG NHẬP QUẢN TRỊ →";
+        }
+
+        if (res.success) {
+          if (statusEl) statusEl.innerText = "Đăng nhập thành công! Đang chuyển hướng...";
+          
+          const userRole = res.role ? res.role.trim() : "CTV";
+          const userName = res.name ? res.name.trim() : "CÁN BỘ";
+          
+          sessionStorage.setItem('loggedAdmin', JSON.stringify({ role: userRole, name: userName }));
+          
+          // SỬA DÒNG NÀY: Gọi trực tiếp gxn.html ở thư mục gốc
+          window.location.href = `gxn.html?mode=admin`;
+        } else {
+          if (statusEl) statusEl.innerText = "";
+          alert("Đăng nhập thất bại: " + (res.error || "Tài khoản hoặc mật khẩu không chính xác!"));
+        }
+      })
+      .catch(err => {
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.innerText = "ĐĂNG NHẬP QUẢN TRỊ →";
+        }
+        if (statusEl) statusEl.innerText = "";
+        alert("Lỗi kết nối máy chủ: " + err.toString());
+      });
+    }
+
+    function goToService(event, serviceKey) {
+      if (event) event.preventDefault();
+
+      if (SERVICE_LOCK_CONFIG[serviceKey]) {
+        alert("⚠️ Dịch vụ này hiện đang tạm đóng để cập nhật/bảo trì hệ thống. Vui lòng quay lại sau!");
+        return; 
+      }
+
+      if (!validMSSV) {
+        alert("Vui lòng xác nhận MSSV tại Trang chủ trước!");
+        return; 
+      }
+
+      const token = btoa(validMSSV);
+      let targetUrl = "";
+
+      // GỌI THẲNG TÊN FILE CÙNG CẤP THƯ MỤC GỐC
+      if (serviceKey === 'gxn') {
+        targetUrl = `gxn.html?token=${encodeURIComponent(token)}`;
+      } else if (serviceKey === 'gcn') {
+        targetUrl = `gcn.html?token=${encodeURIComponent(token)}`;
+      } else if (serviceKey === 'hoatdong') {
+        targetUrl = `hoatdong.html?token=${encodeURIComponent(token)}`;
+      } else {
+        targetUrl = `bieumau.html?token=${encodeURIComponent(token)}`;
+      }
+
+      let sInfo = studentInfoData;
+      if (!sInfo) {
+        const saved = sessionStorage.getItem('loggedStudent');
+        if (saved) sInfo = JSON.parse(saved);
+      }
+
+      if (sInfo) {
+        const hoTenVal = sInfo.hoTen || sInfo.ten || sInfo.name || "";
+        const lopVal = sInfo.lop || "";
+        const khoaVal = sInfo.truongKhoa || sInfo.tuongKhoa || sInfo.khoa || sInfo.svKhoa || "";
+
+        targetUrl += `&name=${encodeURIComponent(hoTenVal)}&lop=${encodeURIComponent(lopVal)}&khoa=${encodeURIComponent(khoaVal)}`;
+      }
+
+      window.location.href = targetUrl;
+    }
+  </script>
+</body>
+</html>

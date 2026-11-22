@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>HỆ THỐNG QUẢN LÝ GIẤY CHỨNG NHẬN THANH NIÊN KHỎE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    body { background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 45%, #eef2ff 100%); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <div class="flex-grow flex flex-col">
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md py-3.5 px-6 flex justify-between items-center shrink-0">
+      <div>
+        <h1 class="font-extrabold text-sm md:text-base leading-tight uppercase">HỆ THỐNG QUẢN LÝ GIẤY CHỨNG NHẬN THANH NIÊN KHỎE</h1>
+        <p class="text-xs text-sky-100 uppercase font-medium">ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</p>
+      </div>
+      <div id="userInfoHeader" class="flex items-center space-x-3">
+        <span id="userFullName" class="font-semibold text-white bg-sky-700/60 px-3 py-1.5 rounded-xl border border-sky-400 text-xs shadow-sm">👋 Sinh viên Y Dược</span>
+        <button onclick="goBackToPortal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition duration-200 shadow-sm flex items-center gap-1">
+          &larr; Quay lại Trang chủ
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-6 flex items-center justify-center">
+      
+      <!-- CARD TRA CỨU GIẤY CHỨNG NHẬN -->
+      <div class="w-full max-w-3xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl p-6 md:p-8 space-y-6 border border-sky-100">
+        
+        <!-- THÔNG TIN SINH VIÊN TỰ ĐỘNG ĐỌC TỪ URL -->
+        <div class="bg-sky-50/80 rounded-2xl p-6 border border-sky-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h3 id="svName" class="text-xl font-extrabold text-sky-900">Đang tải tên...</h3>
+            <p id="svMeta" class="text-sm text-sky-700 mt-1 font-medium">MSSV: -- • Lớp: -- • Trường/Khoa: --</p>
+          </div>
+          <span class="bg-sky-200/60 text-sky-800 text-xs font-bold px-3 py-1.5 rounded-xl border border-sky-300">🏅 Giấy chứng nhận</span>
+        </div>
+
+        <!-- FORM CHỌN NĂM HỌC VÀ CHƯƠNG TRÌNH -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1.5 text-left">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">1. Chọn năm học:</label>
+            <select id="namHocSelect" onchange="handleNamHocChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-sky-500 shadow-sm">
+              <option value="">-- Chọn Năm Học --</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5 text-left">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wide">2. Chọn chương trình đạt được:</label>
+            <select id="programSelect" disabled class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-sky-500 shadow-sm disabled:bg-slate-100 disabled:text-slate-400">
+              <option value="">-- Vui lòng chọn năm học trước --</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="btnSubmit" onclick="submitQuery()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md flex justify-center items-center gap-2">
+          <span>🏅 TRA CỨU & TẠO GIẤY CHỨNG NHẬN</span>
+        </button>
+
+        <div id="loadingStatus" class="hidden text-center py-3 text-slate-500 text-xs font-medium space-x-2">
+          <span class="inline-block animate-spin text-sky-600">⏳</span>
+          <span id="loadingText">Hệ thống đang kiểm tra, vui lòng chờ...</span>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL POPUP XEM TRƯỚC VÀ TẢI GIẤY CHỨNG NHẬN -->
+  <div id="resultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white p-6 rounded-3xl max-w-2xl w-full shadow-2xl space-y-4 text-center border border-sky-100">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-extrabold text-sky-900 text-base uppercase flex items-center gap-2">
+          <span>🎉</span> TRA CỨU GIẤY CHỨNG NHẬN THÀNH CÔNG
+        </h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-500 text-left">Hện thống đã xác minh thành công, bạn có thể xem trước hình ảnh giấy chứng nhận bên dưới và bấm nút lưu về thiết bị:</p>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2 max-h-[60vh] overflow-y-auto">
+        <img id="certPreview" src="" alt="Giấy chứng nhận xem trước" class="w-full h-auto rounded-xl shadow-sm border border-slate-200">
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition" onclick="closeModal()">Đóng cửa sổ</button>
+        <button id="btnDownload" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition flex justify-center items-center gap-1">
+          📥 Tải ảnh về máy (.PNG)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER CHUẨN 3 CỘT -->
+  <footer id="portalFooter" class="w-full max-w-6xl mx-auto px-6 py-6 text-slate-500 text-[11.5px] mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left border-b border-sky-200/60 pb-3 mb-3">
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG</div>
+        <div class="text-slate-600 font-medium leading-relaxed">ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TPHCM</div>
+      </div>
+      
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">📍 ĐỊA CHỈ</div>
+        <div class="text-slate-600 font-medium leading-relaxed space-y-0.5">
+          <div>• 540 Ngô Gia Tự, Phường An Đông, TP. HCM</div>
+          <div>• 217 Hồng Bàng, Phường Chợ Lớn, TP. HCM</div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">📧 LIÊN HỆ</div>
+        <div class="text-slate-600 font-medium leading-relaxed space-y-0.5">
+          <div>• Đoàn - Hội: <a href="mailto:vpdhump@gmail.com" class="text-sky-600 font-bold hover:underline">vpdhump@gmail.com</a></div>
+          <div>• Fanpage: <a href="https://www.facebook.com/tuoitreyduochcm" target="_blank" class="text-sky-600 font-bold hover:underline">Tuổi trẻ Y Dược</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center space-y-1">
+      <div class="font-bold text-slate-700 text-xs">© 2026 VĂN PHÒNG ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</div>
+      <div class="italic text-[10.5px] text-slate-400">The website was developed by NTCL team</div>
+    </div>
+  </footer>
+
+  <script>
+    const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbyMFqGLsp3SbrxDHEHe0yi0q_GTFulrvug61EZEVN6Vs64QJfpbwjb3KNpIMHlC5Hjh/exec";
+    var currentUser = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      let name = urlParams.get('name') || urlParams.get('hoTen') || urlParams.get('svName');
+      let lop = urlParams.get('lop') || urlParams.get('svLop');
+      let khoa = urlParams.get('khoa') || urlParams.get('truongKhoa') || urlParams.get('tuongKhoa') || urlParams.get('svKhoa');
+
+      let mssv = "";
+      if (token) {
+        try { mssv = atob(token); } catch(e) {}
+      } else {
+        mssv = urlParams.get('mssv');
+      }
+
+      // Đọc trực tiếp từ data gốc trong SessionStorage (do index.html lưu khi đăng nhập thành công)
+      const savedStudent = sessionStorage.getItem('loggedStudent');
+      if (savedStudent) {
+        try {
+          const parsed = JSON.parse(savedStudent);
+          if (!mssv) mssv = parsed.mssv;
+          if (!name) name = parsed.hoTen || parsed.ten;
+          if (!lop) lop = parsed.lop;
+          // Lấy đúng khoa gốc từ API Gateway
+          if (!khoa || khoa === "undefined") {
+            khoa = parsed.truongKhoa || parsed.tuongKhoa || parsed.khoa || parsed.svKhoa;
+          }
+        } catch(e) {}
+      }
+
+      if (mssv) {
+        // Làm sạch chuỗi Khoa, nếu không có dữ liệu gốc thì để trường chung của Trường
+        let finalKhoa = (khoa && khoa !== "undefined") ? decodeURIComponent(khoa).trim() : "";
+        if (!finalKhoa) finalKhoa = "Đại học Y Dược TP.HCM";
+
+        currentUser = {
+          mssv: mssv,
+          hoTen: name ? decodeURIComponent(name) : "Sinh viên Y Dược",
+          lop: lop ? decodeURIComponent(lop) : "--",
+          tuongKhoa: finalKhoa
+        };
+
+        document.getElementById('svName').textContent = currentUser.hoTen;
+        document.getElementById('svMeta').textContent = "MSSV: " + currentUser.mssv + " • Lớp: " + currentUser.lop + " • Trường/Khoa: " + currentUser.tuongKhoa;
+        document.getElementById('userFullName').textContent = "👋 " + currentUser.hoTen;
+        
+        loadSchoolYears();
+      } else {
+        alert("Không tìm thấy thông tin sinh viên!");
+        goBackToPortal();
+      }
+    });
+
+    // HÀM TỰ ĐỘNG LẤY DANH SÁCH TAB NĂM HỌC (NH ...) TỪ GOOGLE SHEET
+    function loadSchoolYears() {
+      const yearSelect = document.getElementById("namHocSelect");
+      yearSelect.innerHTML = '<option value="">Đang tải danh sách năm học...</option>';
+
+      fetch(GOOGLE_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getSchoolYears" })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const list = data.schoolYears || [];
+        if (list.length > 0) {
+          yearSelect.innerHTML = '<option value="">-- Chọn Năm Học --</option>';
+          list.forEach(yearName => {
+            const opt = document.createElement("option");
+            opt.value = yearName;
+            opt.textContent = yearName;
+            yearSelect.appendChild(opt);
+          });
+        } else {
+          yearSelect.innerHTML = '<option value="">-- Không có dữ liệu năm học --</option>';
+        }
+      })
+      .catch(err => {
+        console.error("Lỗi nạp năm học:", err);
+        yearSelect.innerHTML = '<option value="">-- Lỗi nạp dữ liệu năm học --</option>';
+      });
+    }
+
+    function handleNamHocChange() {
+      const selectedSheet = document.getElementById('namHocSelect').value;
+      const progSelect = document.getElementById('programSelect');
+      
+      if (!selectedSheet) {
+        progSelect.innerHTML = '<option value="">-- Vui lòng chọn năm học trước --</option>';
+        progSelect.disabled = true;
+        return;
+      }
+      
+      progSelect.disabled = true;
+      progSelect.innerHTML = '<option value="">Đang kiểm tra chương trình đạt được...</option>';
+      
+      fetch(GOOGLE_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "getPrograms", 
+          namHoc: selectedSheet, 
+          mssv: currentUser.mssv 
+        })
+      })
+      .then(res => res.json())
+      .then(response => {
+        progSelect.innerHTML = '';
+        if(!response.success || !response.data || response.data.length === 0) {
+          progSelect.innerHTML = '<option value="">Bạn không có chứng nhận nào trong năm học này</option>';
+          return;
+        }
+        
+        progSelect.innerHTML = '<option value="">-- Chọn chương trình bạn đạt được --</option>';
+        response.data.forEach(progName => {
+          progSelect.innerHTML += `<option value="${progName}">${progName}</option>`;
+        });
+        progSelect.disabled = false;
+      })
+      .catch(err => {
+        console.error(err);
+        progSelect.innerHTML = '<option value="">Lỗi tải dữ liệu. Vui lòng thử lại!</option>';
+      });
+    }
+
+    function submitQuery() {
+      const sheetNamHoc = document.getElementById('namHocSelect').value;
+      const program = document.getElementById('programSelect').value;
+      const btn = document.getElementById('btnSubmit');
+      const loader = document.getElementById('loadingStatus');
+      
+      if (!sheetNamHoc) { alert("Vui lòng lựa chọn Năm học!"); return; }
+      if (!program) { alert("Vui lòng lựa chọn chương trình cần tra cứu!"); return; }
+      
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      if (loader) loader.classList.remove('hidden');
+      
+      fetch(GOOGLE_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "searchCert", 
+          mssv: currentUser.mssv, 
+          hoTen: currentUser.hoTen,
+          lop: currentUser.lop,
+          tuongKhoa: currentUser.tuongKhoa,
+          namHoc: sheetNamHoc, 
+          program: program 
+        })
+      })
+      .then(res => res.json())
+      .then(response => {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        if (loader) loader.classList.add('hidden');
+        
+        if (response.success) {
+          document.getElementById('certPreview').src = response.base64Data;
+          
+          document.getElementById('btnDownload').onclick = function() {
+            const link = document.createElement('a');
+            link.href = response.base64Data;
+            link.download = response.fileName || ("GCN_" + currentUser.mssv + ".png");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          };
+          
+          document.getElementById('resultModal').classList.remove('hidden');
+        } else {
+          alert("Tra cứu thất bại: " + response.error);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        if (loader) loader.classList.add('hidden');
+        console.error(err);
+        alert("Đã xảy ra lỗi kết nối mạng với hệ thống máy chủ!");
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('resultModal').classList.add('hidden');
+    }
+
+    function goBackToPortal() {
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

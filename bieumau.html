@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG CLB - ĐỘI - NHÓM - TRUNG TÂM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    body { background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 45%, #eef2ff 100%); }
+    .tab-btn.active {
+      background-color: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <div class="flex-grow flex flex-col">
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md py-3.5 px-6 flex justify-between items-center shrink-0">
+      <div>
+        <h1 class="font-extrabold text-sm md:text-base leading-tight uppercase">HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG CLB - ĐỘI - NHÓM - TRUNG TÂM</h1>
+        <p class="text-xs text-sky-100 uppercase font-medium">ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</p>
+      </div>
+      <div id="userInfoHeader" class="flex items-center space-x-3">
+        <span id="userFullName" class="font-semibold text-white bg-sky-700/60 px-3 py-1.5 rounded-xl border border-sky-400 text-xs shadow-sm">👋 Sinh viên Y Dược</span>
+        <button onclick="goBackToPortal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-sm">&larr; Quay lại Trang chủ</button>
+      </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-6 flex items-center justify-center">
+      <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-xl p-6 md:p-8 space-y-6 border border-sky-100">
+        
+        <!-- CARD THÔNG TIN SINH VIÊN -->
+        <div class="bg-sky-50/80 rounded-2xl p-5 border border-sky-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h3 id="svName" class="text-xl font-extrabold text-sky-900">Đang tải tên...</h3>
+            <p id="svMeta" class="text-sm text-sky-700 mt-0.5 font-medium">MSSV: -- • Lớp: -- • Trường/Khoa: --</p>
+          </div>
+        </div>
+
+        <!-- BỘ CHUYỂN TAB ĐỘC LẬP -->
+        <div class="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+          <button id="tabMemBtn" onclick="selectTab('thanhvien')" class="tab-btn active py-3 px-4 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2">
+            <span>📜</span> 1. XÁC NHẬN THÀNH VIÊN
+          </button>
+          <button id="tabActBtn" onclick="selectTab('hoatdong')" class="tab-btn py-3 px-4 rounded-xl font-bold text-xs md:text-sm bg-white text-slate-600 border border-slate-200 hover:bg-sky-50 transition flex items-center justify-center gap-2">
+            <span>📋</span> 2. XÁC NHẬN HOẠT ĐỘNG
+          </button>
+        </div>
+
+        <!-- KHUNG 1: XÁC NHẬN THÀNH VIÊN -->
+        <div id="sectionMember" class="space-y-4">
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase">Chọn đơn vị & giai đoạn công tác:</label>
+              <p class="text-[11px] text-slate-500">Dữ liệu được trích xuất theo hồ sơ thành viên của bạn</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1 uppercase">1. Đơn vị/CLB:</label>
+                <select id="memClubSelect" onchange="onClubChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-sky-900 outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="">-- Chọn đơn vị --</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1 uppercase">2. Năm học:</label>
+                <select id="memYearSelect" onchange="onYearChange()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-sky-900 outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="">-- Chọn năm học --</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1 uppercase">3. Học kỳ:</label>
+                <select id="memSemesterSelect" onchange="renderMemberDetail()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-sky-900 outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="">-- Chọn học kỳ --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="memDetailCard" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3" style="display: none;">
+            <div class="font-extrabold text-xs uppercase text-slate-500 tracking-wider">Thông tin xác nhận thành viên</div>
+            <div id="memDetailContent" class="text-xs"></div>
+            <button id="btnMemSubmit" onclick="generateCertificate('thanhvien')" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+              🖼️ TẢI ẢNH GIẤY XÁC NHẬN THÀNH VIÊN
+            </button>
+          </div>
+        </div>
+
+        <!-- KHUNG 2: XÁC NHẬN HOẠT ĐỘNG -->
+        <div id="sectionActivity" class="space-y-6" style="display: none;">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <!-- CỘT TRÁI: GỬI ĐƠN -->
+            <div class="md:col-span-7 space-y-4">
+              <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                <label class="block text-xs font-bold text-slate-700 uppercase">Chọn Đơn vị tổ chức hoạt động:</label>
+                <select id="actClubSelect" onchange="loadClubActivities()" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-sky-900 outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="">-- Đang nạp danh sách đơn vị... --</option>
+                </select>
+              </div>
+
+              <div id="actListCard" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3" style="display: none;">
+                <div class="flex justify-between items-center">
+                  <div class="font-extrabold text-xs uppercase text-slate-500 tracking-wider">Hoạt động đã tham gia</div>
+                  <span class="text-[11px] text-sky-600 font-semibold">(Tối đa 5 hoạt động / 1 giấy)</span>
+                </div>
+                <div id="actListContent" class="text-xs space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                <button id="btnActSubmit" onclick="generateCertificate('hoatdong')" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl text-xs shadow-md transition">
+                  📤 GỬI YÊU CẦU ĐẾN BAN THƯ KÝ
+                </button>
+              </div>
+            </div>
+
+            <!-- CỘT PHẢI: LỊCH SỬ CẤP GIẤY -->
+            <div class="md:col-span-5 space-y-3 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 border-slate-200">
+              <div class="flex justify-between items-center">
+                <h4 class="font-extrabold text-slate-800 text-sm uppercase tracking-wide">Lịch sử cấp giấy</h4>
+                <button onclick="loadHistory()" class="text-[11px] text-sky-600 hover:underline font-bold">🔄 Làm mới</button>
+              </div>
+              <div id="historyContainer" class="space-y-2 max-h-96 overflow-y-auto pr-1">
+                <p class="text-xs text-slate-400 italic text-center py-4">Chưa có yêu cầu nào.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="statusToast" class="text-xs font-semibold text-center min-h-[18px]"></div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer id="portalFooter" class="w-full max-w-6xl mx-auto px-6 py-6 text-slate-500 text-[11.5px] mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left border-b border-sky-200/60 pb-3 mb-3">
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">HỆ THỐNG QUẢN LÝ HOẠT ĐỘNG</div>
+        <div class="text-slate-600 font-medium leading-relaxed">ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TPHCM</div>
+      </div>
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">📍 ĐỊA CHỈ</div>
+        <div class="text-slate-600 font-medium leading-relaxed space-y-0.5">
+          <div>• 540 Ngô Gia Tự, Phường An Đông, TP. HCM</div>
+          <div>• 217 Hồng Bàng, Phường Chợ Lớn, TP. HCM</div>
+        </div>
+      </div>
+      <div>
+        <div class="text-[11px] font-extrabold uppercase text-sky-700 mb-1">📧 LIÊN HỆ</div>
+        <div class="text-slate-600 font-medium leading-relaxed space-y-0.5">
+          <div>• Đoàn - Hội: <a href="mailto:vpdhump@gmail.com" class="text-sky-600 font-bold hover:underline">vpdhump@gmail.com</a></div>
+          <div>• Fanpage: <a href="https://www.facebook.com/tuoitreyduochcm" target="_blank" class="text-sky-600 font-bold hover:underline">Tuổi trẻ Y Dược</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center space-y-1">
+      <div class="font-bold text-slate-700 text-xs">© 2026 VĂN PHÒNG ĐOÀN THANH NIÊN - HỘI SINH VIÊN ĐẠI HỌC Y DƯỢC TP. HỒ CHÍ MINH</div>
+      <div class="italic text-[10.5px] text-slate-400">The website was developed by NTCL team</div>
+    </div>
+  </footer>
+
+  <script>
+    const CLB_API_URL = "https://script.google.com/macros/s/AKfycbyKmQtgAZqLeMjnPwVhwrwA1llukHzEydenmcllEHmjcaAWT3VrG6omEiyxxpPauGEC/exec";
+    var currentUser = null;
+    var myMembershipList = [];
+    var allClubList = [];
+    var currentActivities = [];
+    var currentTab = 'thanhvien';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      let mssv = token ? atob(token) : urlParams.get('mssv');
+      let name = urlParams.get('name') || urlParams.get('hoTen');
+      let lop = urlParams.get('lop');
+      let khoa = urlParams.get('khoa') || urlParams.get('truongKhoa') || urlParams.get('tuongKhoa');
+
+      const savedStudent = sessionStorage.getItem('loggedStudent');
+      if (savedStudent) {
+        try {
+          const parsed = JSON.parse(savedStudent);
+          if (!mssv) mssv = parsed.mssv || parsed.MSSV;
+          if (!name) name = parsed.hoTen || parsed.ten;
+          if (!lop) lop = parsed.lop;
+          if (!khoa || khoa === "undefined" || khoa.trim() === "") {
+            khoa = parsed.truongKhoa || parsed.khoa || parsed.tuongKhoa;
+          }
+        } catch(e) {}
+      }
+
+      if (mssv) {
+        currentUser = {
+          mssv: mssv.toString().trim(),
+          hoTen: name ? decodeURIComponent(name).trim() : "Sinh viên Y Dược",
+          lop: lop ? decodeURIComponent(lop).trim() : "--",
+          tuongKhoa: (khoa && khoa !== "undefined" && khoa.trim() !== "") ? decodeURIComponent(khoa).trim() : "Đại học Y Dược TP.HCM"
+        };
+
+        document.getElementById('svName').textContent = currentUser.hoTen;
+        document.getElementById('svMeta').textContent = "MSSV: " + currentUser.mssv + " • Lớp: " + currentUser.lop + " • Trường/Khoa: " + currentUser.tuongKhoa;
+        document.getElementById('userFullName').textContent = "👋 " + currentUser.hoTen;
+
+        initData();
+      } else {
+        alert("Không tìm thấy thông tin đăng nhập!");
+        goBackToPortal();
+      }
+    });
+
+    function showToast(msg, type = "info") {
+      const toast = document.getElementById('statusToast');
+      if (toast) {
+        toast.textContent = msg;
+        if (type === "error") toast.className = "text-xs font-semibold text-center text-rose-600 mt-2";
+        else if (type === "success") toast.className = "text-xs font-semibold text-center text-emerald-600 mt-2";
+        else toast.className = "text-xs font-semibold text-center text-sky-600 mt-2";
+      }
+    }
+
+    // Tải dữ liệu tuần tự chuẩn xác và chống đơ UI
+    async function initData() {
+      const memSelect = document.getElementById('memClubSelect');
+      if (memSelect) memSelect.innerHTML = '<option value="">⏳ Đang nạp dữ liệu...</option>';
+
+      try {
+        const resMy = await fetch(CLB_API_URL, { 
+          method: "POST", 
+          body: JSON.stringify({ action: "getMyClubs", mssv: currentUser.mssv }) 
+        }).then(r => r.json());
+
+        if (resMy && resMy.success) {
+          myMembershipList = resMy.myClubs || [];
+        } else {
+          console.warn("Cảnh báo từ máy chủ:", resMy ? resMy.error : "Không có phản hồi");
+        }
+      } catch (err) {
+        console.error("Lỗi kết nối getMyClubs:", err);
+      }
+      
+      // LUÔN LUÔN GỌI HÀM NÀY (Để giao diện thoát khỏi trạng thái "Đang nạp...")
+      populateMemberClubs();
+
+      try {
+        const resAll = await fetch(CLB_API_URL, { 
+          method: "POST", 
+          body: JSON.stringify({ action: "getAllClubs" }) 
+        }).then(r => r.json());
+
+        if (resAll && resAll.success) {
+          allClubList = resAll.clubs || [];
+        }
+      } catch (err) {
+        console.error("Lỗi kết nối getAllClubs:", err);
+      }
+      
+      // LUÔN LUÔN GỌI HÀM NÀY
+      populateAllClubs();
+    }
+
+    function selectTab(tabName) {
+      currentTab = tabName;
+      const memBtn = document.getElementById('tabMemBtn');
+      const actBtn = document.getElementById('tabActBtn');
+      const secMem = document.getElementById('sectionMember');
+      const secAct = document.getElementById('sectionActivity');
+
+      if (tabName === 'thanhvien') {
+        memBtn.className = "tab-btn active py-3 px-4 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2";
+        actBtn.className = "tab-btn py-3 px-4 rounded-xl font-bold text-xs md:text-sm bg-white text-slate-600 border border-slate-200 hover:bg-sky-50 transition flex items-center justify-center gap-2";
+        secMem.style.display = "block";
+        secAct.style.display = "none";
+      } else {
+        actBtn.className = "tab-btn active py-3 px-4 rounded-xl font-bold text-xs md:text-sm transition flex items-center justify-center gap-2";
+        memBtn.className = "tab-btn py-3 px-4 rounded-xl font-bold text-xs md:text-sm bg-white text-slate-600 border border-slate-200 hover:bg-sky-50 transition flex items-center justify-center gap-2";
+        secMem.style.display = "none";
+        secAct.style.display = "block";
+        loadHistory();
+      }
+      showToast("");
+    }
+
+    function populateMemberClubs() {
+      const clubSelect = document.getElementById('memClubSelect');
+      const yearSelect = document.getElementById('memYearSelect');
+      const semSelect = document.getElementById('memSemesterSelect');
+      const card = document.getElementById('memDetailCard');
+
+      if (!clubSelect) return;
+      clubSelect.innerHTML = '<option value="">-- Chọn đơn vị --</option>';
+      yearSelect.innerHTML = '<option value="">-- Chọn năm học --</option>';
+      semSelect.innerHTML = '<option value="">-- Chọn học kỳ --</option>';
+      if (card) card.style.display = 'none';
+
+      if (myMembershipList && myMembershipList.length > 0) {
+        clubSelect.disabled = false;
+        yearSelect.disabled = false;
+        semSelect.disabled = false;
+
+        const uniqueClubs = [...new Set(myMembershipList.map(m => m.tenClb))];
+        uniqueClubs.forEach(club => {
+          clubSelect.innerHTML += `<option value="${club}">${club}</option>`;
+        });
+
+        // Tự động chọn đơn vị đầu tiên và kích hoạt chuỗi chọn liên đới
+        clubSelect.selectedIndex = 1;
+        onClubChange();
+      } else {
+        clubSelect.innerHTML = '<option value="">(Không có dữ liệu thành viên)</option>';
+        yearSelect.innerHTML = '<option value="">-- Trống --</option>';
+        semSelect.innerHTML = '<option value="">-- Trống --</option>';
+      }
+    }
+
+    function onClubChange() {
+      const clubSelect = document.getElementById('memClubSelect');
+      const yearSelect = document.getElementById('memYearSelect');
+      const semSelect = document.getElementById('memSemesterSelect');
+      const card = document.getElementById('memDetailCard');
+
+      const club = clubSelect ? clubSelect.value : "";
+      yearSelect.innerHTML = '<option value="">-- Chọn năm học --</option>';
+      semSelect.innerHTML = '<option value="">-- Chọn học kỳ --</option>';
+      if (card) card.style.display = 'none';
+
+      if (!club) return;
+
+      const matchedYears = myMembershipList
+        .filter(m => m.tenClb === club && m.namHoc)
+        .map(m => m.namHoc);
+      const uniqueYears = [...new Set(matchedYears)];
+
+      uniqueYears.forEach(year => {
+        yearSelect.innerHTML += `<option value="${year}">Năm học ${year}</option>`;
+      });
+
+      if (uniqueYears.length > 0) {
+        yearSelect.selectedIndex = 1;
+        onYearChange();
+      }
+    }
+
+    function onYearChange() {
+      const clubSelect = document.getElementById('memClubSelect');
+      const yearSelect = document.getElementById('memYearSelect');
+      const semSelect = document.getElementById('memSemesterSelect');
+      const card = document.getElementById('memDetailCard');
+
+      const club = clubSelect ? clubSelect.value : "";
+      const year = yearSelect ? yearSelect.value : "";
+      semSelect.innerHTML = '<option value="">-- Chọn học kỳ --</option>';
+      if (card) card.style.display = 'none';
+
+      if (!club || !year) return;
+
+      const matchedSemesters = myMembershipList
+        .filter(m => m.tenClb === club && m.namHoc === year && m.hocKi)
+        .map(m => m.hocKi);
+      const uniqueSems = [...new Set(matchedSemesters)];
+
+      uniqueSems.forEach(sem => {
+        semSelect.innerHTML += `<option value="${sem}">Học kỳ ${sem}</option>`;
+      });
+
+      if (uniqueSems.length > 0) {
+        semSelect.selectedIndex = 1;
+        renderMemberDetail();
+      }
+    }
+
+    function renderMemberDetail() {
+      const club = document.getElementById('memClubSelect').value;
+      const year = document.getElementById('memYearSelect').value;
+      const sem = document.getElementById('memSemesterSelect').value;
+      const card = document.getElementById('memDetailCard');
+      const content = document.getElementById('memDetailContent');
+
+      if (!club || !year || !sem) {
+        if (card) card.style.display = 'none';
+        return;
+      }
+
+      const mem = myMembershipList.find(m => m.tenClb === club && m.namHoc === year && String(m.hocKi) === String(sem));
+      if (mem && card && content) {
+        content.innerHTML = `
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-900 space-y-1">
+            <div class="font-extrabold text-sm flex items-center gap-1.5">✅ ĐÃ XÁC MINH DỮ LIỆU THÀNH VIÊN</div>
+            <div class="text-[12px] pt-1">• Đơn vị công tác: <b>${mem.tenClb}</b></div>
+            <div class="text-[12px]">• Chức vụ / Vai trò: <b>${mem.chucVu}</b></div>
+            <div class="text-[12px]">• Thời gian: <b>Học kỳ ${mem.hocKi}</b> — <b>Năm học ${mem.namHoc}</b></div>
+          </div>
+        `;
+        card.style.display = 'block';
+      }
+    }
+
+    function populateAllClubs() {
+      const select = document.getElementById('actClubSelect');
+      if (!select) return;
+      if (allClubList && allClubList.length > 0) {
+        select.innerHTML = '<option value="">-- Chọn đơn vị tổ chức hoạt động --</option>';
+        allClubList.forEach(c => {
+          select.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+      } else {
+        select.innerHTML = '<option value="">(Không tìm thấy đơn vị nào)</option>';
+      }
+    }
+
+    function loadClubActivities() {
+      const clb = document.getElementById('actClubSelect').value;
+      const card = document.getElementById('actListCard');
+      const content = document.getElementById('actListContent');
+
+      if (!clb) { card.style.display = 'none'; return; }
+
+      card.style.display = 'block';
+      content.innerHTML = '<p class="text-sky-600 font-medium py-4 text-center">⏳ Đang tải hoạt động...</p>';
+
+      fetch(CLB_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getClubActivities", mssv: currentUser.mssv, tenClb: clb })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && res.dsHoatDong && res.dsHoatDong.length > 0) {
+          currentActivities = res.dsHoatDong;
+          let html = '';
+          res.dsHoatDong.forEach((a, idx) => {
+            html += `
+              <label class="flex items-start gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-sky-50 transition">
+                <input type="checkbox" value="${idx}" class="clb-act-check mt-0.5 rounded text-sky-600 focus:ring-sky-500">
+                <div class="text-xs">
+                  <div class="font-bold text-slate-800">${a.ten}</div>
+                  <div class="text-slate-500 text-[11px] mt-0.5">Ngày: ${a.ngay} • Vai trò: ${a.vaiTro} • ĐRL: ${a.drl}</div>
+                </div>
+              </label>
+            `;
+          });
+          content.innerHTML = html;
+        } else {
+          currentActivities = [];
+          content.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-rose-800 font-medium">❌ Bạn chưa có dữ liệu hoạt động nào tại ${clb}.</div>`;
+        }
+      })
+      .catch(err => {
+        content.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-rose-800 font-medium">❌ Lỗi tải dữ liệu hoạt động!</div>`;
+      });
+    }
+
+    function generateCertificate(type) {
+      let payload = {
+        action: "submitClubRequest",
+        mssv: currentUser.mssv,
+        hoTen: currentUser.hoTen,
+        lop: currentUser.lop,
+        tuongKhoa: currentUser.tuongKhoa,
+        loaiBieuMau: type
+      };
+
+      const btn = type === 'thanhvien' ? document.getElementById('btnMemSubmit') : document.getElementById('btnActSubmit');
+
+      if (type === 'thanhvien') {
+        const clb = document.getElementById('memClubSelect').value;
+        const year = document.getElementById('memYearSelect').value;
+        const sem = document.getElementById('memSemesterSelect').value;
+
+        const mem = myMembershipList.find(m => m.tenClb === clb && m.namHoc === year && String(m.hocKi) === String(sem));
+        if (!mem) { 
+          showToast("❌ Vui lòng chọn đầy đủ Đơn vị, Năm học và Học kỳ!", "error"); 
+          return; 
+        }
+        payload.tenClb = mem.tenClb;
+        payload.chucVu = mem.chucVu;
+        payload.hocKi = mem.hocKi;
+        payload.namHoc = mem.namHoc;
+      } else {
+        const clb = document.getElementById('actClubSelect').value;
+        if (!clb) { showToast("❌ Vui lòng chọn đơn vị!", "error"); return; }
+        const checked = Array.from(document.querySelectorAll('.clb-act-check:checked')).map(c => currentActivities[parseInt(c.value)]);
+        if (checked.length === 0) { showToast("⚠️ Vui lòng chọn ít nhất 1 hoạt động!", "error"); return; }
+        if (checked.length > 5) { showToast("⚠️ Tối đa 5 hoạt động / 1 giấy!", "error"); return; }
+        payload.tenClb = clb;
+        payload.selectedActs = checked;
+      }
+
+      if (btn) btn.disabled = true;
+      showToast("⏳ Hệ thống đang xử lý, vui lòng chờ...", "info");
+
+      fetch(CLB_API_URL, { method: "POST", body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(res => {
+        if (btn) btn.disabled = false;
+        
+        if (res.success) {
+          if (res.downloadUrl) {
+            showToast("🎉 Đã tạo giấy xác nhận thành công!", "success");
+            window.open(res.downloadUrl, '_blank');
+          } else {
+            showToast("🎉 " + (res.message || "Đã gửi yêu cầu đến Ban Thư ký thành công!"), "success");
+            loadHistory();
+          }
+        } else {
+          showToast("❌ " + (res.error || "Có lỗi xảy ra trong quá trình xử lý!"), "error");
+        }
+      })
+      .catch(err => {
+        if (btn) btn.disabled = false;
+        showToast("❌ Lỗi kết nối máy chủ!", "error");
+      });
+    }
+
+    function loadHistory() {
+      const container = document.getElementById('historyContainer');
+      if (!container) return;
+
+      container.innerHTML = '<p class="text-xs text-sky-600 font-medium py-4 text-center">⏳ Đang tải lịch sử...</p>';
+
+      fetch(CLB_API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getHistory", mssv: currentUser.mssv })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && res.history && res.history.length > 0) {
+          const actHistory = res.history.filter(item => item.loaiBieuMau === 'hoatdong');
+
+          if (actHistory.length === 0) {
+            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Chưa có yêu cầu hoạt động nào.</p>';
+            return;
+          }
+
+          container.innerHTML = '';
+          actHistory.forEach(item => {
+            const isDone = item.trangThai.includes("Hoàn thành") || item.trangThai.includes("Đã duyệt");
+            const isReject = item.trangThai.includes("Từ chối");
+            
+            let badge = "bg-amber-100 text-amber-800 border-amber-200";
+            if (isDone) badge = "bg-emerald-100 text-emerald-800 border-emerald-200";
+            if (isReject) badge = "bg-rose-100 text-rose-800 border-rose-200";
+
+            container.innerHTML += `
+              <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-xs space-y-2 shadow-sm">
+                <div class="flex justify-between items-center">
+                  <span class="font-extrabold text-sky-900">${item.tenClb}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border ${badge}">${item.trangThai}</span>
+                </div>
+                <div class="text-[11px] text-slate-500">🕒 ${item.thoiGian}</div>
+                ${item.lyDoTuChoi ? `<div class="text-rose-600 bg-rose-50 p-2 rounded-lg text-[11px]">❌ ${item.lyDoTuChoi}</div>` : ''}
+                ${isDone && item.downloadUrl ? `
+                  <div class="pt-1 text-right">
+                    <a href="${item.downloadUrl}" target="_blank" class="inline-block bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-xl text-[11px] shadow-sm hover:bg-emerald-700">
+                      🖼️ Tải Giấy xác nhận (Ảnh)
+                    </a>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          });
+        } else {
+          container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Chưa có yêu cầu hoạt động nào.</p>';
+        }
+      })
+      .catch(err => {
+        container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Chưa có yêu cầu hoạt động nào.</p>';
+      });
+    }
+
+    function goBackToPortal() {
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>
